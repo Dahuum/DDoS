@@ -17,3 +17,11 @@
 └─────────────────┘
 
 ```
+
+```bash
+cd command
+make          # Build the project
+make clean    # Clean the build files
+make all      # Rebuild everything
+make clean-all # Clean project and sub-project
+```

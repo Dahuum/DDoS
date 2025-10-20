@@ -1,12 +1,12 @@
 ```ts
 ┌─────────────────┐
-│   command.c     │  ← Your main program
+│   command.c     │  ← main program
 │   calls laod()  │
 └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│     osapi.c     │  ← Your custom I/O library
+│     osapi.c     │  ← custom I/O library
 │  laod()/store() │
 └─────────────────┘
          │

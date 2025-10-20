@@ -15,8 +15,9 @@ command.o: command.c command.h
 	cc $(flags) -c $<
 
 clean-osapi:
-	cd ../osapi/
-	$(MAKE) clean
+	$(MAKE) -C ../osapi clean
 	
 clean:
 	rm -f *.o command.com
+	
+clean-all: clean clean-osapi

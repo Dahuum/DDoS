@@ -46,7 +46,7 @@ typedef int8 error;
 
 
 /* write 1 char */
-public bool laod(fd, int8);
+public bool load(fd, int8);
 
 /* read 1 char */
 public int8 store(fd);

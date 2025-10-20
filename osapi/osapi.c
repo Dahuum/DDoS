@@ -24,7 +24,7 @@ private bool isopen(fd file) {
     return true;
 }
 
-public bool laod(fd file, int8 c) {
+public bool load(fd file, int8 c) {
     int8 buf[2];
     signed int n;
     signed int posixfd;

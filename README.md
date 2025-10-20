@@ -1,2 +1,19 @@
-# ddos
-Custom DOS-like operating system with simple file I/O abstraction layer
+```ts
+┌─────────────────┐
+│   command.c     │  ← Your main program
+│   calls laod()  │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│     osapi.c     │  ← Your custom I/O library
+│  laod()/store() │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Unix system    │  ← Real file operations
+│ read()/write()  │
+└─────────────────┘
+
+```

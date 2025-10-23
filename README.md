@@ -37,20 +37,16 @@ Block N = Byte (N × 512)
 
 **Usage:**
 ```c
-disk *dd = dattach(1);
-dread(dd, &buf, 500);
-dwrite(dd, &buf, 0);
-ddetach(dd);
+disk *dd = dattach(1); // disk attach, mount it
+dread(dd, &buf, 500);  // disk read 
+dwrite(dd, &buf, 0);   // dist write
+ddetach(dd);           // disk detach, mhm unmount it
 ```
 
 **Build:**
 ```bash
-make        # Build
-make clean  # Clean
-make fclean # Clean all
-```
-
-**Create disk:**
-```bash
-dd if=/dev/zero of=disk.1 bs=512 count=65535
+dd if=/dev/zero of=disk.1 bs=512 count=65535 # create disk in drives/
+make        # from command/
+make clean  # Clean /command
+make fclean # osapi/ command/
 ```

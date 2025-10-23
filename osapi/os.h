@@ -24,13 +24,19 @@ typedef int8 error;
 #define ErrInit     1
 #define ErrIO       4
 #define ErrBadFD    8
+
+#define packed __attribute__((packed))
 #define public __attribute__((visibility("default")))
+#define internal __attribute__((visibility("hidden")))
 #define private static
 
 #define reterr(x)   do {\
     errnumber = (x);    \
     return 0;           \
 } while (false)
+
+#define alloc(x) malloc(x)
+#define destory(x) free(x)
 
 #ifdef Library
     public bool initialized = false;
@@ -39,11 +45,6 @@ typedef int8 error;
     extern public bool initialized;
     extern public error errnumber;
 #endif
-
-
-
-    
-
 
 /* write 1 char */
 public bool load(fd, int8);

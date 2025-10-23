@@ -1,9 +1,52 @@
 /* osapi.c */
 #define Library
-#include "os.h"
 #include "osapi.h"
 
 private fd fds[256];
+
+internal void copy(int8 *dst, int8 *src, int16 len) {
+    int16 n;
+    int8 *dp, *sp;
+    
+    for (dp=dst, sp=src, n=len; n; dp++, sp++, n--) 
+        *dp = *sp;
+    
+    return;
+}
+
+private int16 stringlen(int8 *s) {
+    int16 n;
+    int8 *p;
+   
+    for (p=s, n=0; *p; p++, n++);
+    
+    return n;
+}
+
+internal int8 *strnum(int8 *str, int8 num) {
+    static int8 buf[256];
+    int16 n;
+    int8 c;
+    
+    n = stringlen(str);
+    if (!n) 
+        return str;
+    else if  (n > 250) return str;
+    else if  (num > 9) return str;
+   
+   /* 012 */ 
+   /* abc\0 */
+   /* len=3 */
+   
+   zero(buf, 256);
+   copy(buf, str, n);
+    
+   c = num+48;
+   buf[n++] = c;
+   buf[n] = 0;
+    
+   return buf;
+}
 
 /*
  * fd=0 -> error
@@ -85,7 +128,7 @@ private void setupfds() {
     return;
 }
 
-private void zero(int8 *str, int16 size) {
+internal void zero(int8 *str, int16 size) {
     int8 *p;
     int16 n;
     

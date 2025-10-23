@@ -1,4 +1,4 @@
-flags=-O2 -Wall -std=c23 -I../osapi  -fPIC
+flags=-O2 -Wall -std=c23 -I../osapi  -fPIC -g
 ldflags=
 
 .PHONY: clean clean-osapi 

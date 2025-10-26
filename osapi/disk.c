@@ -36,7 +36,7 @@ public void dinit(void) {
     dshow(*dd);
     dshow(dd[1]);
    
-    bool x = dwrite(*dd, &bl, 1);
+    bool x = dwrite(*dd, &bl, 8);
     printf("x=%s\n", (x)?"true":"false");
     //printf("0x%.02hhx\n", (char)(bl[500]));
     

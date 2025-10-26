@@ -1,4 +1,4 @@
-flags=-O2 -Wall -std=c23 -I. 
+flags=-O2 -Wall -std=c23 -I. -g 
 soflags=-ldl -shared -fPIC
 ldflags=
 

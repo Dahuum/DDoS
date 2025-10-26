@@ -20,15 +20,20 @@ typedef int8 error;
 #define true 1
 #define false 0
 
-#define ErrNoErr    0
-#define ErrInit     1
-#define ErrIO       4
-#define ErrBadFD    8
+
 
 #define packed __attribute__((packed))
 #define public __attribute__((visibility("default")))
 #define internal __attribute__((visibility("hidden")))
 #define private static
+
+enum public packed {
+    ErrNoErr,
+    ErrInit,
+    ErrIO,
+    ErrBadFD,
+    ErrNotAttached,
+};
 
 #define reterr(x)   do {\
     errnumber = (x);    \
@@ -45,6 +50,7 @@ typedef int8 error;
     extern public bool initialized;
     extern public error errnumber;
 #endif
+
 
 /* write 1 char */
 public bool load(fd, int8);

@@ -1,4 +1,4 @@
-flags=-O2 -Wall -std=c23 -I. -g 
+flags=-O2 -Wall -std=c23 -I. -g -w 
 soflags=-ldl -shared -fPIC
 ldflags=
 
@@ -6,7 +6,7 @@ ldflags=
 
 all: clean osapi.so
 
-osapi.so: osapi.o disk.o
+osapi.so: osapi.o disk.o omnistd.o fs.o
 	cc $(flags) $(CFLAGS) $(soflags) $^ -o $@
 
 osapi.o: osapi.c osapi.h os.h
@@ -15,5 +15,11 @@ osapi.o: osapi.c osapi.h os.h
 disk.o: disk.c disk.h
 	cc $(flags) $(CFLAGS) -c $<
 	
+omnistd.o: omnistd.c omnistd.h
+	cc $(flags) $(CFLAGS) -c $<
+	
+fs.o: fs.c fs.h
+	cc $(flags) $(CFLAGS) -c $<
+
 clean:
 	rm -f *.o  *.so osapi

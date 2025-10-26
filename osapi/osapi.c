@@ -4,16 +4,6 @@
 
 private fd fds[256];
 
-internal void copy(int8 *dst, int8 *src, int16 len) {
-    int16 n;
-    int8 *dp, *sp;
-    
-    for (dp=dst, sp=src, n=len; n; dp++, sp++, n--) 
-        *dp = *sp;
-    
-    return;
-}
-
 private int16 stringlen(int8 *s) {
     int16 n;
     int8 *p;
@@ -128,12 +118,6 @@ private void setupfds() {
     return;
 }
 
-internal void zero(int8 *str, int16 size) {
-    int8 *p;
-    int16 n;
-    
-    for (n=size, p=str; n; n--, p++) *p = (int8)0;
-}
 
 public void init() {
     errnumber = (int8)0;

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "os.h"
+#include "omnistd.h"
 #include <sys/stat.h> /* for fstat(); */
 #include <stdio.h>
 #include <fcntl.h>
@@ -17,7 +18,5 @@
     private int16 stringlen(int8*);
 #endif
 internal int8 *strnum(int8*, int8);
-internal void zero(int8*,int16);
-internal void copy(int8*, int8*, int16);
 
 public void dinit(void);

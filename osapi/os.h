@@ -33,6 +33,7 @@ enum public packed {
     ErrIO,
     ErrBadFD,
     ErrNotAttached,
+    ErrNoMem,
 };
 
 #define reterr(x)   do {\
@@ -40,7 +41,7 @@ enum public packed {
     return 0;           \
 } while (false)
 
-#define alloc(x) malloc(x)
+#define alloc(x) malloc($i x)
 #define destory(x) free(x)
 
 #ifdef Library

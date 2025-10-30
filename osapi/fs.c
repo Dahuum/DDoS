@@ -1,6 +1,27 @@
 /* fs.c */
 #include "fs.h"
-#include "os.h"
+
+internal bitmap *mkbitmap(disk *dd, bool scan) {
+    bitmap *bm;
+    int16 size, n;
+    fsblock block;
+    
+    if (!dd) 
+        return (bitmap *)false;
+    
+    size = (dd->blocks / 8);
+    if (dd->blocks % 8) 
+        size++;
+    bm = (bitmap *)alloc(size);
+    if (!bm)
+        return (bitmap *)false;
+    zero($1 bm, size);
+    
+    if (!scan)
+        return bm;
+    
+    for (n=1; n <= dd->blocks; n++)
+}
 
 internal filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master boot record */
    filesystem *fs;
@@ -61,9 +82,9 @@ internal filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master
    }
    
    size = sizeof(struct s_filesystem);
-   fs = (filesystem *)malloc($i size);
+   fs = (filesystem *)alloc(size);
    if (!fs) 
-       return (filesystem *)0;
+       reterr(ErrNoMem);
    zero($1 fs, size);
    
    fs->drive = dd->drive;

@@ -13,6 +13,7 @@
 
 typedef int16 ptr;
 typedef int8 bootsector[500];
+typedef bool bitmap;
 
 enum internal packed {
     TypeNotValid = 0x00,
@@ -62,4 +63,7 @@ union internal packed u_fsblock {
 };
 typedef union u_fsblock fsblock;
 
-internal filesystem *fsformat(disk*, bootsector*);
+internal filesystem *fsformat(disk*,bootsector*,bool);
+internal bitmap *mkbitmap(disk*,bool);
+block bitmapalloc(bitmap*);
+void bitmapfree(bitmap*,block);

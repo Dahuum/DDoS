@@ -40,7 +40,7 @@ Block N = Byte (N × 512)
 disk *dd = dattach(1); // disk attach, mount it
 dread(dd, &buf, 500);  // disk read 
 dwrite(dd, &buf, 0);   // dist write
-ddetach(dd);           // disk detach, mhm unmount it
+ddetach(dd);           // disk detach, mhm unmount it hello world 
 ```
 
 **Build:**

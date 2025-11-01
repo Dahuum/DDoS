@@ -33,6 +33,7 @@ enum public packed {
     ErrIO,
     ErrBadFD,
     ErrNotAttached,
+    ErrBusy,
     ErrNoMem,
 };
 

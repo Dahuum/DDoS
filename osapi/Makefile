@@ -4,7 +4,7 @@ ldflags=
 
 .PHONY:  clean
 
-all: clean osapi.so
+all: clean osapi.so ddosutil
 
 osapi.so: osapi.o disk.o omnistd.o fs.o
 	cc $(flags) $(CFLAGS) $(soflags) $^ -o $@
@@ -21,5 +21,12 @@ omnistd.o: omnistd.c omnistd.h
 fs.o: fs.c fs.h
 	cc $(flags) $(CFLAGS) -c $<
 
+ddosutil: ddosutil.o osapi.so
+	cc $(flags) $(CFLAGS) $^ -o $@
+	mv -f ddosutil ../util/
+
+ddosutil.o: ddosutil.c
+	cc $(flags) $(CFLAGS) -c $<
+	
 clean:
 	rm -f *.o  *.so osapi

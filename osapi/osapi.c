@@ -126,3 +126,12 @@ public void init() {
     
     return;
 }
+
+// todo: 
+internal int16 openfiles(disk* dd) {
+    return 0;
+}
+
+internal void closeallfiles(disk* dd) {
+    return ;
+}

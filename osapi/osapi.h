@@ -2,6 +2,7 @@
 #pragma once
 
 #include "os.h"
+#include "disk.h"
 #include "omnistd.h"
 #include <sys/stat.h> /* for fstat(); */
 #include <stdio.h>
@@ -19,4 +20,9 @@
 #endif
 internal int8 *strnum(int8*, int8);
 
+internal void closeallfiles(disk* dd);
+internal int16 openfiles(disk* dd);
+
+
+public void init(void);
 public void dinit(void);

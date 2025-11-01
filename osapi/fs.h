@@ -64,6 +64,6 @@ union internal packed u_fsblock {
 typedef union u_fsblock fsblock;
 
 internal filesystem *fsformat(disk*,bootsector*,bool);
-internal bitmap *mkbitmap(disk*,bool);
-block bitmapalloc(bitmap*);
-void bitmapfree(bitmap*,block);
+internal bitmap *mkbitmap(filesystem *fs,bool scan);
+internal int16 bitmapalloc(filesystem *fs,bitmap*);
+internal void bitmapfree(filesystem *fs, bitmap *bm, int16 bl);

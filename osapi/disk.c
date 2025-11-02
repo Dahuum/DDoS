@@ -24,29 +24,30 @@ internal void dshow(disk *dd) {
    return ;
 }
 
+public disk *DiskDescriptor[2];
 public void dinit(void) {
-    disk *dd[2];
+    //disk *dd[2];
     block bl;
    
     for (int n = 0; n < 512; n++) bl[n] = 0x00;
     attached = 0;
-    *dd = dattach(1);
-    *(dd+1) = dattach(2);
+    *DiskDescriptor = dattach(1);
+    *(DiskDescriptor+1) = dattach(2);
    
-    dshow(*dd);
-    dshow(dd[1]);
+    dshow(*DiskDescriptor);
+    dshow(DiskDescriptor[1]);
    
-    bool x = dwrite(*dd, &bl, 8);
+    bool x = dwrite(*DiskDescriptor, &bl, 8);
     printf("x=%s\n", (x)?"true":"false");
     //printf("0x%.02hhx\n", (char)(bl[500]));
     
-    ddetach(*dd);
-    ddetach(*(dd+1));
+    ddetach(*DiskDescriptor);
+    ddetach(*(DiskDescriptor+1));
     
     return ;
 }
-
-internal void ddetach(disk *dd) {
+/* kanet internal */
+public void ddetach(disk *dd) {
    int8 x; 
     
     if (!dd) return ;
@@ -59,7 +60,8 @@ internal void ddetach(disk *dd) {
     return;
 }
 
-internal disk *dattach(int8 drive) {
+/* kanet internal */
+public disk *dattach(int8 drive) {
     disk *dd;
     int16 size;
     int8 *file;

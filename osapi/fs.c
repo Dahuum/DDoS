@@ -72,7 +72,7 @@ internal void bitmapfree(filesystem *fs, bitmap *bm, int16 bl) {
    return ;
 }
 
-internal filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master boot record */
+public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master boot record */
    filesystem *fs;
    int16 size, inodeblocks, blocks, n;
    superblock super;

@@ -18,8 +18,8 @@ struct internal packed s_disk {
 };
 typedef struct internal packed s_disk disk;
 
-internal disk *dattach(int8);
-internal void ddetach(disk*);
+public disk *dattach(int8);
+public void ddetach(disk*);
 internal void dshow(disk*);
 
 /* 

@@ -23,7 +23,6 @@ void cmd_format(char *arg1, char *arg2) {
    }
    else {
        if ((*arg2 == '-') && (arg1[1] == 's'))  {
-           
            drivestr = $1 arg2;
        }
        else 

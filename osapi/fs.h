@@ -55,7 +55,7 @@ struct internal packed s_inode {
 };
 typedef struct s_inode inode;
 
-union internal packed u_fsblock {
+union internal packed u_fsblock { 
     superblock super;
     int8 data[Blocksize];
     ptr pointers[PtrPerBlock];

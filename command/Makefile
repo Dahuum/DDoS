@@ -1,6 +1,5 @@
 flags=-O2 -Wall -std=c23 -I../osapi  -fPIC -g -w
 ldflags=
-CC=gcc-15
 
 .PHONY: clean clean-osapi 
 

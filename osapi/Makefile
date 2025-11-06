@@ -1,7 +1,7 @@
 flags=-O2 -Wall -std=c23 -I. -g -w
 soflags=-ldl -shared -fPIC
 ldflags=
-CC=gcc-15
+
 
 .PHONY:  clean
 

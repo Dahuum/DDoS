@@ -31,7 +31,7 @@ internal bitmap *mkbitmap(filesystem *fs, bool scan) {
         }
         
         for (x=0; x < Inodesperblock; x++) {
-            valid = (bool)(block.inodes[n].validtype & 0x01);
+            valid = (bool)(block.inodes[x].validtype & 0x01);
             if (valid)
                 bm[index] = true;
             else 

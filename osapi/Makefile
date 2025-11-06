@@ -1,32 +1,33 @@
 flags=-O2 -Wall -std=c23 -I. -g -w
 soflags=-ldl -shared -fPIC
 ldflags=
+CC=gcc-15
 
 .PHONY:  clean
 
 all: clean osapi.so ddosutil
 
 osapi.so: osapi.o disk.o omnistd.o fs.o
-	cc $(flags) $(CFLAGS) $(soflags) $^ -o $@
+	$(CC) $(flags) $(CFLAGS) $(soflags) $^ -o $@
 
 osapi.o: osapi.c osapi.h os.h
-	cc $(flags) $(CFLAGS) -c $<
+	$(CC) $(flags) $(CFLAGS) -c $<
 
 disk.o: disk.c disk.h
-	cc $(flags) $(CFLAGS) -c $<
+	$(CC) $(flags) $(CFLAGS) -c $<
 
 omnistd.o: omnistd.c omnistd.h
-	cc $(flags) $(CFLAGS) -c $<
+	$(CC) $(flags) $(CFLAGS) -c $<
 
 fs.o: fs.c fs.h
-	cc $(flags) $(CFLAGS) -c $<
+	 $(CC) $(flags) $(CFLAGS) -c $<
 
 ddosutil: ddosutil.o osapi.o disk.o omnistd.o fs.o
-	cc $(flags) $(CFLAGS) $^ -o $@
+	$(CC) $(flags) $(CFLAGS) $^ -o $@
 	mv -f ddosutil ../util/
 
 ddosutil.o: ddosutil.c osapi.h
-	cc $(flags) $(CFLAGS) -c $<
+	$(CC) $(flags) $(CFLAGS) -c $<
 
 clean:
 	rm -f *.o  *.so osapi

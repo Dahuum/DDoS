@@ -72,6 +72,9 @@ internal void bitmapfree(filesystem *fs, bitmap *bm, int16 bl) {
    return ;
 }
 
+/*
+ * Format disk: write superblock, clear inode table, initialize root dir  
+ */
 public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master boot record */
    filesystem *fs;
    int16 size, inodeblocks, blocks, n;
@@ -89,12 +92,14 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
        else
            closeallfiles(dd);
    }
-   
+  
+   /* Calculate inode space: 10% of disk space blocks, rounded up */
    blocks = dd->blocks;
    inodeblocks = (blocks / 10);
    if (blocks % 10)
        inodeblocks++;
-   
+  
+   /* Setup root dir inode (empty, no data blocks) */
    idx.validtype = TypeDir;
    idx.size = 0;
    zero($1 &idx.name, 11);
@@ -102,9 +107,10 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
    size = (sizeof(ptr)*PtrPerInode);
    zero($1 &idx.direct, size);
 
+   /* Initialize superblock */
    super.magic1 = Magic1;
    super.magic2 = Magic2;
-   super.inodes = 1;
+   super.inodes = 1; // kaina root dir 
    super.inodeblocks = inodeblocks;
    super.blocks = blocks;
    super._ = 0;
@@ -114,13 +120,16 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
    else
        zero($1 &super.boot, 500);
    
+   /* Write superblock to block 1 */
    ok = dwrite(dd, &super, 1);
    if (!ok)
        reterr(ErrIO);
+   /* Write root inode to block 2 */
    ok = dwrite(dd, &idx, 2);
    if (!ok)
        reterr(ErrIO);
    
+   /* Create  in-memory filesystem structure */
    zero($1 &fsb, Blocksize);
    for (n=0; n<inodeblocks; n++) {
        ok = dwrite(dd, &fsb, (n+3));

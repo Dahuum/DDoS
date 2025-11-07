@@ -22,13 +22,13 @@ enum internal packed {
 }; 
 
 struct internal packed s_superblock {
-    bootsector boot;
-    int16 _;
-    int16 blocks;
-    int16 inodeblocks;
-    int16 inodes;
-    int16 magic1;
-    int16 magic2;
+    bootsector boot;   /* 500 */
+    int16 _;           /* 502 */
+    int16 blocks;      /* 504 */
+    int16 inodeblocks; /* 506 */
+    int16 inodes;      /* 508 */
+    int16 magic1;      /* 510 */
+    int16 magic2;      /* 512 */
 };
 typedef struct s_superblock superblock;
 

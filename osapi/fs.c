@@ -33,9 +33,9 @@ internal bitmap *mkbitmap(filesystem *fs, bool scan) {
         for (x=0; x < Inodesperblock; x++) {
             valid = (bool)(block.inodes[x].validtype & 0x01);
             if (valid)
-                bm[index] = true;
+                setbit($1 bm, index, true);
             else 
-                bm[index] = false;
+                setbit($1 bm, index, false);
             index++;
         }
     }
@@ -50,8 +50,8 @@ internal int16 bitmapalloc(filesystem *fs, bitmap *bm) {
        return 0;
    
    for (n=1; n<fs->dd->blocks; n++) {
-       if (!bm[n]) {
-           bm[n] = true;
+       if (!getbit($1 bm, n)) {
+           setbit($1 bm, n, true);
            bl = (n+1);
            
            return bl;
@@ -67,7 +67,7 @@ internal void bitmapfree(filesystem *fs, bitmap *bm, int16 bl) {
        return ;
   
    n = (bl - 1);
-   bm[n] = false;
+   setbit($1 bm, n, false);
    
    return ;
 }
@@ -147,16 +147,27 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
    fs->dd = dd;
    copy($1 &fs->metadata, $1 &super, Blocksize);
  
-   /*
    bm = mkbitmap(fs, false);
    size = 
        1 // superblock
        + 1 // direcotry /
        + fs->metadata.inodeblocks; // # of inode blocks;
     for (n=0; n<=size; n++)
-        bm[n] = true; 
-   fs->bitmap = bm;
-   */
-   fs->bitmap = 0;
-   return fs;
+        setbit($1 bm, n, true);
+    
+    printf("bitmap=");
+    fflush(stdout);
+    for (int i = 0; i < dd->blocks; i++) {
+        if (getbit($1 bm, i)) printf("1");
+        else  printf("0");
+        
+        if (n>0) {
+            if (!(i%8)) printf(" ");
+            if (!(i%64)) printf("\n");
+        }
+    }
+    printf("\n\n");
+    fs->bitmap = bm;
+   
+    return fs;
 }

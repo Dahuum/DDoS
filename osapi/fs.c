@@ -155,19 +155,117 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
     for (n=0; n<=size; n++)
         setbit($1 bm, n, true);
     
-    printf("bitmap=");
-    fflush(stdout);
-    for (int i = 0; i < dd->blocks; i++) {
-        if (getbit($1 bm, i)) printf("1");
-        else  printf("0");
-        
-        if (n>0) {
-            if (!(i%8)) printf(" ");
-            if (!(i%64)) printf("\n");
-        }
-    }
-    printf("\n\n");
     fs->bitmap = bm;
    
     return fs;
+}
+
+internal void fsshow(filesystem *fs, bool showbm) {
+    int8 drivechar;
+    ptr inodeno, i;
+    inode *ino;
+    
+    if (!fs) return ;
+    
+    drivechar = (fs->drive == 1) ? 
+                    (int8)'c' :
+                (fs->drive == 2) ? 
+                    (int8)'d' : 
+                (int8)'?';
+    printf("Disk 0x%.02hhx, mounted on %c:\n", (char)fs->drive, (char)drivechar);
+    printf("   %d total blocks, 1 superblock and %d inode blocks\n"
+        "   Containing %d inodes\n\n", 
+        $i fs->metadata.blocks, $i fs->metadata.inodeblocks, $i fs->metadata.inodes);
+    
+   for (inodeno=0; inodeno<fs->metadata.inodes; inodeno++)  {
+       ino = findinode(fs, inodeno);
+       if (!ino) break ;
+       
+        if ((ino->validtype & 0x01)) 
+           printf("Inode %d is valid (type=%s)\n"
+               "   filename is %s\n"
+               "   %d size in bytes\n",
+                    $2 inodeno,
+                    (ino->validtype == TypeFile) ? 
+                        "file": 
+                    (ino->validtype == TypeDir) ? 
+                        "dir":
+                    "unknown",
+                    ((!inodeno) ? 
+                        "/" : 
+                    $c file2str(&ino->name)),
+                    $i ino->size
+           );
+   }
+   if (showbm) {
+       printf("bitmap=");
+       fflush(stdout);
+       for (i=0; i<fs->dd->blocks; i++) {
+           if (getbit($1 fs->bitmap, i)) printf("1");
+           else  printf("0");
+           
+           if (i>0) {
+               if (!(i%8)) printf(" ");
+               if (!(i%64)) printf("\n");
+           }
+       }
+       printf("\n\n");
+   }
+}
+
+internal inode *findinode(filesystem *fs, ptr idx) {
+    fsblock bl;
+    int16 n, size;
+    bool res, loop;
+    inode *ret;
+    ptr x,y;
+    
+    if (!fs) return (inode *)0;
+    
+    ret = (inode *)0;
+    loop = true;
+    for (n=0,x=2; loop && x<fs->metadata.inodeblocks; x++) {
+        zero($1 &bl, Blocksize);
+        res = dread(fs->dd, $1 &bl.data, x);
+        if (!res) return ret; 
+        
+        for (y=0; y<Inodesperblock; y++,n++) {
+            if (n==idx) {
+                size = sizeof(struct s_inode);
+                ret = (inode *)alloc(size);
+                if (!ret) return (inode *)0;
+                
+                zero($1 ret, size);
+                copy($1 ret, $1 &bl.inodes[n], size);
+                x = $2 -1;
+                loop = false;
+                
+                break ;
+            }
+        }
+    }
+    return  ret;
+}
+
+internal int8 *file2str(filename *fname) {
+   static int8 buf[16];
+   int8 *p;
+   int16 n;
+   
+   if (!fname) return $1 0;
+   
+   if (!(*fname->ext)) return fname->name;
+   
+   zero(buf, 16);
+   stringcopy(buf, fname->name, 8);
+   n = stringlen(buf);
+   
+   n++;
+   buf[n++] = '.';
+   p = buf + n;
+  
+   stringcopy(p, fname->ext, 3);
+   p = buf;
+   
+   return p;
 }

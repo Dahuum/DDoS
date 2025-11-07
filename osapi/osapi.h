@@ -16,8 +16,8 @@
 #ifdef Library
     private bool isopen(fd);
     private void setupfds();
-    private int16 stringlen(int8*);
 #endif
+internal int16 stringlen(int8*);
 internal int8 *strnum(int8*, int8);
 
 internal void closeallfiles(disk* dd);

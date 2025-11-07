@@ -33,7 +33,7 @@ struct internal packed s_superblock {
 typedef struct s_superblock superblock;
 
 struct internal packed s_filesystem {
-    int8 drive;
+    int8 drive:2;
     disk *dd;
     bool *bitmap;
     superblock metadata;
@@ -64,6 +64,9 @@ union internal packed u_fsblock {
 typedef union u_fsblock fsblock;
 
 public filesystem *fsformat(disk*,bootsector*,bool);
-internal bitmap *mkbitmap(filesystem *,bool);
-internal int16 bitmapalloc(filesystem *,bitmap*);
-internal void bitmapfree(filesystem *,bitmap *,int16);
+internal bitmap *mkbitmap(filesystem*,bool);
+internal int16 bitmapalloc(filesystem*,bitmap*);
+internal void bitmapfree(filesystem*,bitmap*,int16);
+internal void fsshow(filesystem*,bool);
+internal inode *findinode(filesystem*,ptr);
+internal int8 *file2str(filename*);

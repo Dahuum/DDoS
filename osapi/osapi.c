@@ -4,7 +4,7 @@
 
 private fd fds[256];
 
-private int16 stringlen(int8 *s) {
+internal int16 stringlen(int8 *s) {
     int16 n;
     int8 *p;
    

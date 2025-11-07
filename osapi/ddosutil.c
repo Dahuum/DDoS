@@ -60,8 +60,8 @@ void cmd_format(char *arg1, char *arg2) {
        exit(-1);
    }
    fs = fsformat(dd, (bootsector *)0, bforce);
-   if (fs);
-        // fsshow(fs);
+   if (fs)
+        fsshow(fs, false);
     else 
         fprintf(stderr, "Formatting failed\n");
    

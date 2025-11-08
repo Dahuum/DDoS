@@ -24,25 +24,19 @@ internal void dshow(disk *dd) {
    return ;
 }
 
-public disk *DiskDescriptor[2];
+public disk *DiskDescriptor[Maxdrive];
 public void dinit(void) {
-    //disk *dd[2];
-    block bl;
+    int8 n;
    
-    for (int n = 0; n < 512; n++) bl[n] = 0x00;
     attached = 0;
-    *DiskDescriptor = dattach(1);
-    *(DiskDescriptor+1) = dattach(2);
-   
-    dshow(*DiskDescriptor);
-    dshow(DiskDescriptor[1]);
-   
-    bool x = dwrite(*DiskDescriptor, &bl, 8);
-    printf("x=%s\n", (x)?"true":"false");
-    //printf("0x%.02hhx\n", (char)(bl[500]));
+    for (n=1; n<=Maxdrive; n++)
+        *(DiskDescriptor+(n-1)) = dattach(n);
     
-    ddetach(*DiskDescriptor);
-    ddetach(*(DiskDescriptor+1));
+    if (*DiskDescriptor) 
+        fsmount(1);
+   
+    for (n=1; n<=Maxdrive; n++)
+        ddetach(DiskDescriptor[n-1]);
     
     return ;
 }

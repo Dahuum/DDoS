@@ -2,10 +2,12 @@
 
 #include <stdio.h>
 #include "osapi.h"
+#include "fs.h"
 
 #define DriveC      0x01    /* 0001 */
 #define DriveD      0x02    /* 0010 */
 #define Basepath    $1 "/home/void_id/Desktop/DDoS/drives/disk."
+#define Maxdrive    0x02
 
 #define Blocksize   512
 
@@ -17,6 +19,8 @@ struct internal packed s_disk {
     int8 drive:2;
 };
 typedef struct internal packed s_disk disk;
+
+extern disk *DiskDescriptor[Maxdrive];
 
 public disk *dattach(int8);
 public void ddetach(disk*);

@@ -22,7 +22,7 @@ internal bitmap *mkbitmap(filesystem *fs, bool scan) {
     if (!scan)
         return bm;
     
-    for (n=2; n <= (fs->metadata.inodeblocks+1); n++) {
+    for (n=2; n<=(fs->metadata.inodeblocks+1); n++) {
         zero($1 &block, Blocksize);
         ret = dread(fs->dd, &block, n);
         if (!ret) {
@@ -172,7 +172,7 @@ internal void fsshow(filesystem *fs, bool showbm) {
                 (fs->drive == 2) ? 
                     (int8)'d' : 
                 (int8)'?';
-    printf("Disk 0x%.02hhx, mounted on %c:\n", (char)fs->drive, (char)drivechar);
+    printf("\n\nDisk 0x%.02hhx, mounted on %c:\n", (char)fs->drive, (char)drivechar);
     printf("   %d total blocks, 1 superblock and %d inode blocks\n"
         "   Containing %d inodes\n\n", 
         $i fs->metadata.blocks, $i fs->metadata.inodeblocks, $i fs->metadata.inodes);
@@ -269,3 +269,68 @@ internal int8 *file2str(filename *fname) {
    
    return p;
 }
+
+ public filesystem *FSdescriptor[Maxdrive];
+ internal filesystem *fsmount(int8 drive) {
+    ptr idx;
+    disk *dd;
+    filesystem *fs;
+    int16 size;
+    
+    if (drive > Maxdrive) return (filesystem *)0;
+    idx = (drive-1);
+    dd = DiskDescriptor[idx];
+    if (!dd) return (filesystem *)0;
+    
+    size = sizeof(struct s_filesystem);
+    fs = (filesystem *)alloc(size);
+    if (!fs) return (filesystem *)0;
+    
+    zero($1 fs, size);
+    
+    /*
+     struct internal packed s_filesystem {
+         int8 drive:2;
+         disk *dd;
+         bool *bitmap;
+         superblock metadata;
+     };
+     typedef struct s_filesystem filesystem;
+     */
+     
+     fs->drive = drive;
+     fs->dd = dd;
+     fs->bitmap = mkbitmap(fs, true);
+     if (!fs->bitmap) {
+         destory(fs);
+         return (filesystem *)0;
+     }
+     if (!dread(fs->dd, &fs->metadata, 1)) {
+         destory(fs);
+         return (filesystem *)0;
+     }
+     
+     kprintf("Mounted disk 0x%x on drive %c: ", 
+         drive, (drive == 1) ? 'c' : (drive == 2) ? 'd' : '?'
+     );
+     
+     FSdescriptor[idx] = fs;
+                
+    return fs;
+ }
+ 
+ internal void fsunmount(filesystem *fs) {
+    ptr idx;
+    int16 drive;
+    
+    if (!fs) return ;
+    drive = fs->dd->drive;
+    idx = (fs->dd->drive-1);
+    FSdescriptor[idx] = (filesystem *)0;
+    destory(fs);
+    
+    kprintf("Unmounted drive %c: ", 
+        drive, (drive == 1) ? 'c' : (drive == 2) ? 'd' : '?'
+    );
+    return ;
+ }

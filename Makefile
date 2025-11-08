@@ -1,8 +1,8 @@
 OS:= $(shell uname)
 
-ifeq ($(OS), Linux)
+ifeq ($(OS), Linux) # Linux
 	CC=cc
-else ifeq ($(OS), Darwin)
+else ifeq ($(OS), Darwin) # MacOS (flcase diali, brew install gcc-15 ltst version btw)
 	CC=gcc-15
 else 
 	CC=NoBodyKnow # hadi khassni nchuf blanha

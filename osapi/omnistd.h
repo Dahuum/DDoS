@@ -3,6 +3,8 @@
 
 #include "osapi.h"
 
+#define kprintf(f,args ...) printf(f "\n",args)
+
 #define copy(d,s,l)         memorycopy(d,s,l,false)
 #define stringcopy(d,s,l)   memorycopy(d,s,l,true)
 

@@ -26,7 +26,7 @@ internal bitmap *mkbitmap(filesystem *fs, bool scan) {
         zero($1 &block, Blocksize);
         ret = dread(fs->dd, &block, n);
         if (!ret) {
-            destory(bm);
+            destroy(bm);
             return (bitmap *)false; 
         }
         
@@ -302,11 +302,11 @@ internal int8 *file2str(filename *fname) {
      fs->dd = dd;
      fs->bitmap = mkbitmap(fs, true);
      if (!fs->bitmap) {
-         destory(fs);
+         destroy(fs);
          return (filesystem *)0;
      }
      if (!dread(fs->dd, &fs->metadata, 1)) {
-         destory(fs);
+         destroy(fs);
          return (filesystem *)0;
      }
      
@@ -327,10 +327,93 @@ internal int8 *file2str(filename *fname) {
     drive = fs->dd->drive;
     idx = (fs->dd->drive-1);
     FSdescriptor[idx] = (filesystem *)0;
-    destory(fs);
+    destroy(fs);
     
     kprintf("Unmounted drive %c: ", 
         drive, (drive == 1) ? 'c' : (drive == 2) ? 'd' : '?'
     );
     return ;
  }
+ 
+ internal ptr fssaveinode(filesystem *fs, inode *ino, ptr idx) {
+     fsblock bl;
+     ptr blockno;
+     int16 size;
+     bool ret;
+     if (!fs || !ino) 
+         return 0;
+     
+     /* Kain Mushkil hna, if something happened, tryto change 3 -> 2, 
+      * since block 0 is reservec, 
+      * and the 1 is the superblock, 
+      * 2 root inode (directory) 
+      */
+     blockno = (idx / 16) + 3; 
+     printf("blockno=%d\n", blockno);
+     ret = dread(fs->dd, &bl.data, blockno);
+     if (!ret)
+         return 0;
+     size = sizeof(struct s_inode);
+     copy($1 &bl.inodes[idx], $1 ino, size);
+     
+     
+     ret = dwrite(fs->dd, &bl.data, blockno);
+     if (!ret)
+         return 0;
+     
+     return blockno;
+ }
+ 
+ public ptr inalloc(filesystem *fs) {
+     ptr idx, n, max;
+     inode *p;
+     
+     if (!fs)
+         return 0;
+     
+     max = (fs->metadata.inodeblocks * Inodesperblock);
+     for (idx=n=0; n<max; n++) {
+         p = findinode(fs, n);
+         if (!p) 
+             break ;
+         printf("checking inode[%d] validtype=0x%.02x\n",n, p->validtype);
+         if (!(p->validtype & 0x01)) {
+             idx=n;
+             p->validtype = 1;
+             if (!(fssaveinode(fs,p,idx))) {
+                 idx=0;
+                 break ;
+             }
+             fs->metadata.inodes++;
+             dwrite(fs->dd, &fs->metadata, 1);
+             
+             break ;
+         }
+     }
+     if (!p) 
+         destroy(p);
+     
+     return idx; 
+ }
+ 
+ public bool inunalloc(filesystem *fs, ptr idx) {
+     inode *p;
+     ptr blockno;
+     
+     if (!fs)
+         return false;
+     
+      p = findinode(fs, idx);
+      if (!p) {
+          destroy(p);
+          return false;
+      }
+      p->validtype = 0x00;
+      blockno = fssaveinode(fs, p, idx);
+      destroy(p);
+      fs->metadata.inodes--;
+      dwrite(fs->dd, &fs->metadata, 1);
+        
+      return (blockno) ? true : false;
+ }
+ 

@@ -49,7 +49,7 @@ public void ddetach(disk *dd) {
     close(dd->fd);
     x = ~(dd->drive) & attached;
     attached = x;
-    destory(dd);
+    destroy(dd);
     
     return;
 }
@@ -77,7 +77,7 @@ public disk *dattach(int8 drive) {
     file = strnum(Basepath, drive);
     tmp = open($c file, O_RDWR);
     if (tmp < 3) {
-        destory(dd);
+        destroy(dd);
         return (disk *)0;
     }
     dd->fd = $4 tmp;
@@ -85,7 +85,7 @@ public disk *dattach(int8 drive) {
     tmp = fstat($i dd->fd, &sbuf);
     if (tmp || !sbuf.st_blocks) {
         close(dd->fd);
-        destory(dd);
+        destroy(dd);
         
         return (disk *)0;
     }

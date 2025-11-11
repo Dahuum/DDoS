@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define getposixfd(x) fds[x]
 #define asserted_initialized() if (!initialized) reterr(ErrInit)

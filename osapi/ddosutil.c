@@ -60,7 +60,11 @@ void cmd_format(char *arg1, char *arg2) {
        exit(-1);
    }
    fs = fsformat(dd, (bootsector *)0, bforce);
-   if (fs)
+   int tmp1 = inalloc(fs);
+   int tmp2 = inalloc(fs);
+   printf("tmp1=%d\n", tmp1);
+   printf("tmp2=%d\n", tmp2);
+    if (fs)
         fsshow(fs, false);
     else 
         fprintf(stderr, "Formatting failed\n");

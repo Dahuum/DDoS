@@ -185,3 +185,27 @@ public filesystem *fsformat(disk* dd, bootsector* mbr, bool force) {
  * files, and every data written in the disk for sure, 
  * of courese it live in the ram, even i don't know exactly how but yes 
  */
+ 
+ 
+ Wellefna sehir lil ana w lgemra mkiyfin
+ Khok ghadi wakha ymil, ghaybano chkon li mziyfin
+ Ghaybano chkon li real, kamlin 3el l3a9a mtayfin
+ Ga3 tme3na f dollar bills w f Porto Rico mseyfin
+ Nti li 9telti 9elbi wakha kan bohdk kaybghik
+ Ana li 9telt nniya w 7alef 3emro y3awed yti9
+ Bezzaf li 3ayech 7elma w ga3 ma baghi yfi9 y3i9
+ Kangol f rassi nsitek kayfekkerni fik tri9
+ W ba9i 3a9el 3la ga3 lkhayeb w ga3 zwin w 3a9el
+ Ba9i 3a9el ch7al men merra te7t w l9itek rajel
+ L7yat ghi battle w lkebda klitha, la ma b9itch fragile
+ Dima l rassi w kif l3ada gha kanzido rassid
+ 
+ [Refrain : Drizzy w Anys]
+ Ih, ya lali ya li ya lilali
+ Ya khsara, 7ta li bghitha tel3etli chitana
+ Ih, ya lali ya li ya lilali
+ Ma tgoulch khsara, ga3 li ghderna rah qerrana
+ Ih, ya lali ya li ya lilali
+ Ya khsara, 7ta li bghitha tel3etli chitana
+ Ih, ya lali ya li ya lilali
+ Ma tgoulch khsara, ga3 li ghderna rah qerrana

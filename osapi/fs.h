@@ -15,11 +15,12 @@ typedef int16 ptr;
 typedef int8 bootsector[500];
 typedef bool bitmap;
 
-enum internal packed {
+enum internal packed  e_type {
     TypeNotValid = 0x00,
     TypeFile = 0x01,
     TypeDir = 0x03,
 }; 
+typedef enum e_type type;
 
 struct internal packed s_superblock {
     bootsector boot;   /* 500 */
@@ -70,6 +71,11 @@ internal void bitmapfree(filesystem*,bitmap*,int16);
 internal void fsshow(filesystem*,bool);
 internal inode *findinode(filesystem*,ptr);
 internal int8 *file2str(filename*);
-
 internal filesystem *fsmount(int8);
 internal void fsunmout(filesystem*);
+
+internal ptr increate(filesystem *, filename *, type);
+internal bool indestroy(ptr);
+public ptr inalloc(filesystem *);
+public bool inunalloc(filesystem *,ptr);
+internal ptr fssaveinode(filesystem *, inode*, ptr);

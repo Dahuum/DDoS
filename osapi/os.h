@@ -43,7 +43,7 @@ enum public packed {
 } while (false)
 
 #define alloc(x) malloc($i x)
-#define destory(x) free(x)
+#define destroy(x) free(x)
 
 #ifdef Library
     public bool initialized = false;

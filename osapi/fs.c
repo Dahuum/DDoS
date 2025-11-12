@@ -224,7 +224,7 @@ internal inode *findinode(filesystem *fs, ptr idx) {
     
     ret = (inode *)0;
     loop = true;
-    for (n=0,x=2; loop && x<fs->metadata.inodeblocks; x++) {
+    for (n=0,x=2; loop && x<(fs->metadata.inodeblocks+2); x++) {
         zero($1 &bl, Blocksize);
         res = dread(fs->dd, $1 &bl.data, x);
         if (!res) return ret; 
@@ -236,7 +236,7 @@ internal inode *findinode(filesystem *fs, ptr idx) {
                 if (!ret) return (inode *)0;
                 
                 zero($1 ret, size);
-                copy($1 ret, $1 &bl.inodes[n], size);
+                copy($1 ret, $1 &bl.inodes[y], size); /* hadi rah y, machi n, no need to tell why */
                 x = $2 -1;
                 loop = false;
                 
@@ -337,7 +337,7 @@ internal int8 *file2str(filename *fname) {
  
  internal ptr fssaveinode(filesystem *fs, inode *ino, ptr idx) {
      fsblock bl;
-     ptr blockno;
+     ptr blockno, blockoffset;
      int16 size;
      bool ret;
      if (!fs || !ino) 
@@ -346,15 +346,21 @@ internal int8 *file2str(filename *fname) {
      /* Kain Mushkil hna, if something happened, tryto change 3 -> 2, 
       * since block 0 is reservec, 
       * and the 1 is the superblock, 
-      * 2 root inode (directory) 
+      * 2 root inode (directory) : 
+      * |
+      * |__> Al7mar, machi lblock 2 dial root inode, rah block 2 
+      *     fih 16 inode, ou linode lwla dial root directory, ye3ni 
+      *     ba9in 15, ye3ni a dada lfahim, rah blockno = (idx / 16) + 2 machi + 3
+      *     we are still on the block two a chrif
       */
-     blockno = (idx / 16) + 3; 
+     blockno = (idx / 16) + 2; 
+     blockoffset = (idx % Inodesperblock);
      printf("blockno=%d\n", blockno);
      ret = dread(fs->dd, &bl.data, blockno);
      if (!ret)
          return 0;
      size = sizeof(struct s_inode);
-     copy($1 &bl.inodes[idx], $1 ino, size);
+     copy($1 &bl.inodes[blockoffset], $1 ino, size);
      
      
      ret = dwrite(fs->dd, &bl.data, blockno);
@@ -376,7 +382,7 @@ internal int8 *file2str(filename *fname) {
          p = findinode(fs, n);
          if (!p) 
              break ;
-         printf("checking inode[%d] validtype=0x%.02x\n",n, p->validtype);
+         printf("checking inode[%d] validtype=0x%.02x\n",(n + 2), p->validtype);
          if (!(p->validtype & 0x01)) {
              idx=n;
              p->validtype = 1;
@@ -390,7 +396,7 @@ internal int8 *file2str(filename *fname) {
              break ;
          }
      }
-     if (!p) 
+     if (p) 
          destroy(p);
      
      return idx; 

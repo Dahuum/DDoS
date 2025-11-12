@@ -60,6 +60,9 @@ void cmd_format(char *arg1, char *arg2) {
        exit(-1);
    }
    fs = fsformat(dd, (bootsector *)0, bforce);
+   printf("\n" "fs->inodeblocks == %d\n", fs->metadata.inodeblocks);
+   printf("sizeof inode: %d\n", $1 sizeof(struct s_inode));
+   printf("fs->inodeblocks * InodePerBlock == %d\n\n", fs->metadata.inodeblocks * 16);
    int tmp1 = inalloc(fs);
    int tmp2 = inalloc(fs);
    printf("tmp1=%d\n", tmp1);

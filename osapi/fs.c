@@ -254,17 +254,19 @@ internal int8 *file2str(filename *fname) {
    
    if (!fname) return $1 0;
    
-   if (!(*fname->ext)) return fname->name;
    
    zero(buf, 16);
-   stringcopy(buf, fname->name, 8);
-   n = stringlen(buf);
+   copy($1 buf, $1 fname->name, $2 8);
    
-   n++;
+   if (!(*fname->ext)) {
+       p = buf;
+       return p;
+   }
+   n = stringlen(buf);
    buf[n++] = '.';
    p = buf + n;
   
-   stringcopy(p, fname->ext, 3);
+   copy(p, fname->ext, 3);
    p = buf;
    
    return p;
@@ -369,7 +371,7 @@ internal int8 *file2str(filename *fname) {
      
      return blockno;
  }
- 
+ /* Errors NTBI */ 
  public ptr inalloc(filesystem *fs) {
      ptr idx, n, max;
      inode *p;
@@ -422,4 +424,73 @@ internal int8 *file2str(filename *fname) {
         
       return (blockno) ? true : false;
  }
+
+ /* (xx) */
+ private bool validfname(filename *name, type filetype) {
+     return true;
+ }
  
+ 
+ internal ptr increate(filesystem *fs, filename *name, type filetype) {
+     ptr idx;
+     inode *ino;
+     bool valid; 
+     int16 size;
+     
+     errnumber = ErrNoErr;
+  
+     if (!fs || !name || !filetype)
+         reterr(ErrArg);
+     
+     valid = validfname(name, filetype);
+     if (!valid)
+         reterr(ErrFilename);
+     
+     idx = inalloc(fs);
+     if (!idx)
+         reterr(ErrInode);
+     
+     size = sizeof(struct s_inode);
+     ino = (inode *)alloc(size);
+     if (!ino)
+         reterr(ErrNoMem);
+     
+     ino->validtype = filetype;
+     ino->size = 0;
+     
+     size = sizeof(struct s_filename);
+     copy($1 &ino->name, $1 name, size);
+     
+     valid = (bool)fssaveinode(fs, ino, idx);
+     destroy(ino);
+     if (!valid)
+         reterr(ErrIO);
+     
+     return idx;
+ }
+ 
+ // public fileinfo *fsstat(path* pathname) { 
+ public fileinfo *fsstat(filesystem *fs, ptr idx) {
+     inode *ino;
+     fileinfo *info;
+     int16 size;
+     
+     if (!fs)
+         reterr(ErrArg);
+     
+     ino = findinode(fs, idx);
+     if (!ino)
+         reterr(ErrInode);
+   
+     size = sizeof(struct s_fileinfo);
+     info = (fileinfo *)alloc(size);
+     if (!info)
+         reterr(ErrNoMem);
+     zero($1 info, size);
+     
+     info->idx = idx;
+     info->size = ino->size;
+     destroy(ino);
+     
+     return info; 
+ }

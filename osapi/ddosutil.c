@@ -1,3 +1,4 @@
+#include "omnistd.h"
 #include "osapi.h" 
 #include <stdlib.h>
 #include <string.h>
@@ -59,18 +60,30 @@ void cmd_format(char *arg1, char *arg2) {
        fprintf(stderr, "Bad disk\n"); 
        exit(-1);
    }
+   /* <== // Test Area // ==> */
+   ptr idx, idx1;
+   filename name;
+   int16 size = sizeof(struct s_filename);
    fs = fsformat(dd, (bootsector *)0, bforce);
-   printf("\n" "fs->inodeblocks == %d\n", fs->metadata.inodeblocks);
-   printf("sizeof inode: %d\n", $1 sizeof(struct s_inode));
-   printf("fs->inodeblocks * InodePerBlock == %d\n\n", fs->metadata.inodeblocks * 16);
-   int tmp1 = inalloc(fs);
-   int tmp2 = inalloc(fs);
-   printf("tmp1=%d\n", tmp1);
-   printf("tmp2=%d\n", tmp2);
+   
+   zero($1 &name, size);
+   copy($1 &name.name, $1 "autoexec", $2 8);
+   copy($1 &name.ext, $1 "cpp", $2 3);
+   idx = increate(fs, &name, TypeFile);
+   printf("idx=%d\n", $i idx);
+   
+   zero($1 &name, size);
+   stringcopy($1 &name.name, $1 "ddos", $2 4);
+   idx1 = increate(fs, &name, TypeDir);
+   printf("idx1=%d\n", $i idx1);
+   
     if (fs)
         fsshow(fs, false);
     else 
         fprintf(stderr, "Formatting failed\n");
+    if (idx1) indestroy(fs, idx1);
+    if (fs) fsshow(fs, false);
+    /* <== // Test Area // ==> */
    
     return ;
 }

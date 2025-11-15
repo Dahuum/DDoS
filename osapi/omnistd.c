@@ -19,6 +19,9 @@ internal void memorycopy(int8 *dst, int8 *src, int16 len, bool string) {
             *dp = *sp;
     }
     
+    if (string)
+        *dp = (int8)0;
+    
     return;
 }
 

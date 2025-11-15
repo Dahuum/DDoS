@@ -35,13 +35,16 @@ enum public packed {
     ErrNotAttached,
     ErrBusy,
     ErrNoMem,
+    ErrArg,
+    ErrFilename,
+    ErrInode,
 };
 
 #define reterr(x)   do {\
     errnumber = (x);    \
     return 0;           \
 } while (false)
-
+#define throw() return 0
 #define alloc(x) malloc($i x)
 #define destroy(x) free(x)
 

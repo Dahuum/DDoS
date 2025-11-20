@@ -25,6 +25,15 @@ internal void memorycopy(int8 *dst, int8 *src, int16 len, bool string) {
     return;
 }
 
+internal int16 stringlen(int8 *s) {
+    int16 n;
+    int8 *p;
+   
+    for (p=s, n=0; *p; p++, n++);
+    
+    return n;
+}
+
 internal bool getbit(int8* str, int16 idx) {
     int16 blocks;
     int8 mod;
@@ -59,4 +68,20 @@ internal void setbit(int8* str, int16 idx, bool val) {
         *byte = unsetbit_(*byte, mod);
     
     return ;
+}
+
+internal void tolowercase(int8 *name) {
+    int8* p;
+    int16 n;
+    
+    for (p=name, n=11; n; p++,n--)
+        if (*p)
+            *p = low(*p);
+    return;
+}
+
+internal int8 low(int8 c) {
+    if ((c > 0x40) && (c < 0x5b))
+        return (c + 32);
+    return c;
 }

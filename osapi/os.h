@@ -38,6 +38,8 @@ enum public packed {
     ErrArg,
     ErrFilename,
     ErrInode,
+    ErrBadDir,
+    ErrNotFound,
 };
 
 #define reterr(x)   do {\

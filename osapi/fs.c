@@ -427,7 +427,23 @@ internal int8 *file2str(filename *fname) {
 
  /* (xx) */
  private bool validfname(filename *name, type filetype) {
-     return true;
+     int16 n;
+     bool ret;
+     int8 *p;
+     
+     if (!filename || !filetype)
+        reterr(ErrArg);
+     else if ((filetype == TypeDir) && (*name->ext))
+        reterr(ErrFilename);
+     
+     n = (filetype = TypeFile) ? 11 : 8;
+     
+    for (ret=true, p = $1 name; n;  n--, p++) 
+        if (!validchar(*p)) {
+            ret = false;
+            break;
+        }
+    return ret;
  }
  
  
@@ -468,8 +484,9 @@ internal int8 *file2str(filename *fname) {
      
      return idx;
  }
- 
- // public fileinfo *fsstat(path* pathname) { 
+/* 
+public fileinfo *fsstat(path* pathname) { 
+*/
  public fileinfo *fsstat(filesystem *fs, ptr idx) {
      inode *ino;
      fileinfo *info;
@@ -494,3 +511,90 @@ internal int8 *file2str(filename *fname) {
      
      return info; 
  }
+ 
+ 
+private ptr readdir(filesystem *fs, ptr haystack, filename *needle) {
+    inode *dir, *child;
+    ptr idx, n, blockno;
+    fsblock bl;
+    bool ret;
+    
+    errnumber = ErrNoErr;
+    
+    if (!fs || !needle)
+        reterr(ErrArg);
+    
+    dir = findinode(fs, haystack);
+    if (!dir)
+        reterr(ErrInode);
+    
+    if (dir->validtype != TypeDir) {
+        destroy(p);
+        reterr(ErrBadDir);
+    }
+    
+    for (n=0; n<PtrPerInode; n++) {
+        idx = dir->direct[n];
+        if (!idx) 
+            continue;
+        
+        child = findinode(fs, idx);
+        if (!child)
+            continue;
+        
+        if (cmp($1 needle, $1 child->name, $2 11)) {
+            destroy(dir);
+            destroy(child);
+            
+            return idx;
+        }
+        destory(child);
+    }
+    
+    if (!dir->indirect) {
+        destory(dir);
+        reterr(ErrNotFound);
+    }
+    
+    blockno = p->indirect;
+    zero($1 &bl, Blocksize);
+    ret =  dread(fs->dd, &bl, blockno);
+    if (!ret) {
+        destory(dir);
+        reterr(ErrNotFound);
+    }
+    
+    for (n=0; n<PtrPerBlock; n++) {
+        idx = bl.pointers[n];
+        if (!idx) 
+            continue;
+        
+        child = findinode(fs, idx);
+        if (!child)
+            continue;
+        
+        if (cmp($1 needle, $1 child->name, $2 11)) {
+            destroy(dir);
+            destroy(child);
+            
+            return idx;
+        }
+        destory(child);
+    }
+    destroy(dir);
+    reterr(ErrNotFound);
+}
+
+private bool validchar(int8 c) {
+    int8 *p;
+    bool ret;
+    
+    ret = false;
+    for (p=ValidChars; *p; p++)
+        if (c == *p) {
+           ret = true ;
+           break;
+        }
+    
+    return ret;
+}

@@ -10,6 +10,7 @@
 #define Inodesperblock  (16)
 #define PtrPerInode     (8)
 #define PtrPerBlock     (256)
+#define ValidChars  $1 "abcdefghijklmnopqrstuvwxyz0123456789_-"
 
 typedef int16 ptr;
 typedef int8 bootsector[500];
@@ -72,6 +73,7 @@ struct public packed s_fileinfo {
 typedef struct s_fileinfo fileinfo;
 
 #define indestroy(f,p) (bool)inunalloc((f), (p))
+#define filename2low(x) tolowercase($1 (x))
 
 /* internal -> private? */
 public   filesystem *fsformat(disk*,bootsector*,bool);
@@ -84,11 +86,14 @@ internal int8 *file2str(filename*);
 internal filesystem *fsmount(int8);
 internal void fsunmout(filesystem*);
 
-internal ptr increate(filesystem *, filename *, type);
-public ptr inalloc(filesystem *);
-public bool inunalloc(filesystem *,ptr);
-internal ptr fssaveinode(filesystem *, inode*, ptr);
+internal ptr increate(filesystem*,filename*,type);
+public ptr inalloc(filesystem*);
+public bool inunalloc(filesystem*,ptr);
+internal ptr fssaveinode(filesystem*,inode*,ptr);
 // public fileinfo *fsstat(path*);
-public fileinfo *fsstat(filesystem *,ptr);
+public fileinfo *fsstat(filesystem*,ptr);
 
-private bool validfname(filename *, type filetype);
+private bool validfname(filename*, type);
+private bool validchar(int8);
+
+private ptr readdir(filesystem*,ptr,filename*);

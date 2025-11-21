@@ -9,6 +9,8 @@
 #define stringcopy(d,s,l)   memorycopy(d,s,l,true)
 #define cmp(d,s,l)          memorycmp(d,s,l,false)
 #define stringcmp(d,s,l)    memorycmp(d,s,l,true)
+#define findcharl(s,c)      findchar(s,c,true)
+#define findcharr(s,c)      findchar(s,c,false)
 
 #define getbit_(b,p)        ((b & (1 << p)) >> p)
 #define unsetbit_(b,p)      (b & ~(1 << p))
@@ -24,3 +26,5 @@ internal void setbit(int8*,int16,bool);
 
 internal void tolowercase(int8*);
 internal int8 low(int8);
+
+internal int8 *findchar(int8*,int8,bool);

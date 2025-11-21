@@ -10,12 +10,14 @@
 #define Inodesperblock  (16)
 #define PtrPerInode     (8)
 #define PtrPerBlock     (256)
-#define ValidChars  $1 "abcdefghijklmnopqrstuvwxyz0123456789_-"
+#define ValidChars      ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-")
+#define ValidPathChars  ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-/:.")
+#define DirDepth        (16) 
 
 typedef int16 ptr;
 typedef int8 bootsector[500];
 typedef bool bitmap;
-typedef int8 path;
+// typedef int8 path;
 
 enum internal packed  e_type {
     TypeNotValid = 0x00,
@@ -72,6 +74,14 @@ struct public packed s_fileinfo {
 };
 typedef struct s_fileinfo fileinfo;
 
+struct  internal packed s_path {
+   filesystem *fs;
+   int16 drive;
+   filename target;
+   int8 dirpath[DirDepth+1][9];
+};
+typedef struct s_path path;
+
 #define indestroy(f,p) (bool)inunalloc((f), (p))
 #define filename2low(x) tolowercase($1 (x))
 
@@ -82,6 +92,7 @@ internal int16 bitmapalloc(filesystem*,bitmap*);
 internal void bitmapfree(filesystem*,bitmap*,int16);
 internal void fsshow(filesystem*,bool);
 internal inode *findinode(filesystem*,ptr);
+internal filename *str2file(int8*);
 internal int8 *file2str(filename*);
 internal filesystem *fsmount(int8);
 internal void fsunmout(filesystem*);
@@ -93,7 +104,10 @@ internal ptr fssaveinode(filesystem*,inode*,ptr);
 // public fileinfo *fsstat(path*);
 public fileinfo *fsstat(filesystem*,ptr);
 
-private bool validfname(filename*, type);
-private bool validchar(int8);
+public bool validfname(filename*, type);
+private bool validpname(int8*);
+public bool validchar(int8);
+private bool validchar_(int8);
 
 private ptr readdir(filesystem*,ptr,filename*);
+public path *mkpath(int8*,filesystem*);

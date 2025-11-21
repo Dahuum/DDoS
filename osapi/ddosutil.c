@@ -1,4 +1,5 @@
 #include "omnistd.h"
+#include "os.h"
 #include "osapi.h" 
 #include <stdlib.h>
 #include <string.h>
@@ -62,12 +63,14 @@ void cmd_format(char *arg1, char *arg2) {
    }
    /* <== // Test Area // ==> */
    ptr idx, idx1;
+   path *filepath;
    filename name;
+   char *fpath;
    int16 size = sizeof(struct s_filename);
    fs = fsformat(dd, (bootsector *)0, bforce);
    
    zero($1 &name, size);
-   copy($1 &name.name, $1 "autoexec", $2 8);
+   copy($1 &name.name, $1 "auto", $2 4);
    copy($1 &name.ext, $1 "cpp", $2 3);
    idx = increate(fs, &name, TypeFile);
    printf("idx=%d\n", $i idx);
@@ -81,6 +84,19 @@ void cmd_format(char *arg1, char *arg2) {
         fsshow(fs, false);
     else 
         fprintf(stderr, "Formatting failed\n");
+    fpath = strdup("c:/ddos/system16/config/driver.sys");
+    filepath =  mkpath($1 fpath, (filesystem *)0);
+    
+    if (!filepath)
+        printf("\nNo filepath\n");
+    else {
+        printf("\nfpath == %s\n", fpath);
+        // for (int i = 0; filepath->dirpath[i]; i++)
+            printf("filepath->dirpath[1] = '%s'\n",  $c filepath->dirpath[1]);
+        printf("filepath->target = '%s'\n", $c file2str(&filepath->target));
+    }
+    destroy(fpath);
+    
     if (idx1) indestroy(fs, idx1);
     if (fs) fsshow(fs, false);
     /* <== // Test Area // ==> */

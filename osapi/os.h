@@ -40,6 +40,9 @@ enum public packed {
     ErrInode,
     ErrBadDir,
     ErrNotFound,
+    ErrDisk,
+    ErrPath,
+    ErrDrive,
 };
 
 #define reterr(x)   do {\

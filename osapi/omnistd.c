@@ -85,3 +85,21 @@ internal int8 low(int8 c) {
         return (c + 32);
     return c;
 }
+
+internal int8 *findchar(int8 *haystack, int8 needle, bool fromleft) {
+    int8 *p;
+    int16 idx;
+    
+    if (!haystack)
+        return $1 0;
+    
+    idx = (stringlen(haystack)-1);
+    
+    for (p=(fromleft)?haystack:haystack+idx; *p && idx; (fromleft)?p++:p--,idx--)
+        if (*p == needle)
+            break ;
+    
+    return (*p == needle) ? 
+            p :
+        $1 0;
+}

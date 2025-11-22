@@ -744,8 +744,9 @@ public path *mkpath(int8 *str, filesystem *fs) {
         reterr(ErrFilename);
 
     size = sizeof(struct s_filename);
-    stringcopy($1 &path_.target.name, $1 name->name, $2 8);
-    stringcopy($1 &path_.target.ext, $1 name->ext, $2 3);
+    // stringcopy($1 &path_.target.name, $1 name->name, $2 8);
+    // stringcopy($1 &path_.target.ext, $1 name->ext, $2 3);
+    copy($1 &path_.target, $1 name, $2 size);
 
     p--;
     *p = (int8)0;

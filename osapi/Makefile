@@ -1,5 +1,5 @@
-flags=-O2 -Wall -std=c23 -I. -g -w
-soflags=-ldl -shared -fPIC
+flags=-O2 -Wall -std=c23 -I. -g -w -fPIC 
+soflags=-ldl -shared 
 ldflags=
 
 

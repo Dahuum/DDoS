@@ -13,6 +13,7 @@
 #define ValidChars      ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-")
 #define ValidPathChars  ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-/:.")
 #define DirDepth        (16) 
+#define MaxFilesPerDir  (PtrPerInode+PtrPerBlock)
 
 typedef int16 ptr;   
 typedef int8 bootsector[500];
@@ -82,6 +83,30 @@ struct  internal packed s_path {
 };
 typedef struct s_path path;
 
+struct public packed s_fileentry {
+    ptr inode;
+    filename name;
+    int16 size;
+    type filetype;
+};
+typedef struct s_fileentry fileentry;
+
+struct public packed s_directory {
+    int16 drive;
+    filesystem *fs;
+    ptr inode;
+    filename *dirname;
+    int16 len;
+    fileentry *filelist;
+};
+typedef struct s_directory directory;
+
+struct public packed s_tuple {
+    int16 numfiles;
+    fileentry *filelist;
+};
+typedef struct s_tuple tuple;
+
 #define indestroy(f,p) (bool)inunalloc((f), (p))
 #define filename2low(x) tolowercase($1 (x))
 
@@ -108,6 +133,10 @@ public bool validfname(filename*, type);
 private bool validpname(int8*);
 public bool validchar(int8);
 private bool validchar_(int8);
+internal void showpath(const path*);
+internal ptr path2inode(path*);
 
-private ptr readdir(filesystem*,ptr,filename*);
+internal ptr read_dir(filesystem*,ptr,filename*);
 public path *mkpath(int8*,filesystem*);
+internal tuple *mkfilelist(filesystem*,inode*);
+

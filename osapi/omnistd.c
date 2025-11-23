@@ -25,6 +25,25 @@ internal void memorycopy(int8 *dst, int8 *src, int16 len, bool string) {
     return;
 }
 
+internal bool memorycmp(int8 *dst, int8 *src, int16 len, bool string) {
+    int16 n;
+    int8 *dp, *sp;
+    bool ret;
+   
+    ret = true;
+    for (dp=dst, sp=src, n=len; n; dp++, sp++, n--) {
+        if ((string) && !(*sp))
+            break;
+        else 
+            if (*dp != *sp) {
+                ret = false;
+                break ;
+            }
+    }
+    
+    return ret;
+}
+
 internal int16 stringlen(int8 *s) {
     int16 n;
     int8 *p;

@@ -221,20 +221,24 @@ internal inode *findinode(filesystem *fs, ptr idx) {
     inode *ret;
     ptr x,y;
 
-    if (!fs) return (inode *)0;
+    errnumber = ErrNoErr;
+    if (!fs) 
+        reterr(ErrArg);
 
     ret = (inode *)0;
     loop = true;
     for (n=0,x=2; loop && x<(fs->metadata.inodeblocks+2); x++) {
         zero($1 &bl, Blocksize);
         res = dread(fs->dd, $1 &bl.data, x);
-        if (!res) return ret;
+        if (!res) 
+            reterr(ErrIO);
 
         for (y=0; y<Inodesperblock; y++,n++) {
             if (n==idx) {
                 size = sizeof(struct s_inode);
                 ret = (inode *)alloc(size);
-                if (!ret) return (inode *)0;
+                if (!ret) 
+                    reterr(ErrNoMem);
 
                 zero($1 ret, size);
                 copy($1 ret, $1 &bl.inodes[y], size); /* hadi rah y, machi n, no need to tell why */
@@ -245,6 +249,8 @@ internal inode *findinode(filesystem *fs, ptr idx) {
             }
         }
     }
+    if (!ret)
+        reterr(ErrNotFound);
     return  ret;
 }
 
@@ -382,7 +388,7 @@ internal filename *str2file(int8 *str) {
       */
      blockno = (idx / 16) + 2;
      blockoffset = (idx % Inodesperblock);
-     printf("blockno=%d\n", blockno);
+     // printf("blockno=%d\n", blockno);
      ret = dread(fs->dd, &bl.data, blockno);
      if (!ret)
          return 0;
@@ -409,7 +415,7 @@ internal filename *str2file(int8 *str) {
          p = findinode(fs, n);
          if (!p)
              break ;
-         printf("checking inode[%d] validtype=0x%.02x\n",(n + 2), p->validtype);
+         // printf("checking inode[%d] validtype=0x%.02x\n",(n + 2), p->validtype);
          if (!(p->validtype & 0x01)) {
              idx=n;
              p->validtype = 1;
@@ -560,7 +566,7 @@ public fileinfo *fsstat(path* pathname) {
  }
 
 
-private ptr readdir(filesystem *fs, ptr haystack, filename *needle) {
+internal ptr read_dir(filesystem *fs, ptr haystack, filename *needle) {
     inode *dir, *child;
     ptr idx, n, blockno;
     fsblock bl;
@@ -677,7 +683,7 @@ private bool parsepath(int8 *str, path *pptr, int16 idx_) {
         *pptr->dirpath[idx] = (int8)0;
         return true;
     }
-
+    
     p = findcharl(str, (int8)'/');
     if (!p) {
         stringcopy($1 pptr->dirpath[idx], $1 str, $2 8);
@@ -688,11 +694,39 @@ private bool parsepath(int8 *str, path *pptr, int16 idx_) {
     }
 
     *p = 0;
+    
     stringcopy($1 pptr->dirpath[idx], $1 str, $2 8);
     p++;
     idx++;
 
     return parsepath(p, pptr, idx);
+}
+
+/*
+    filesystem *fs;
+    int16 drive;
+    filename target;
+    int8 dirpath[DirDepth+1][9];
+ */
+
+internal void showpath(const path *filepath) {
+    int8 *p;
+    int16 n;
+    
+    if (!filepath)
+        return ;
+    
+    printf(
+        "filesystem: \t0x%.08x\n"
+        "drive: \t0x%.02hhx\n"
+        "target: \t%s\n",
+             $i filepath->fs, (char)filepath->drive,
+                $c file2str(&filepath->target)
+    );
+    fsshow(filepath->fs,false);
+    
+    for (p=filepath->dirpath[n=0]; *p; p=filepath->dirpath[++n])
+        printf("   %d=%s\n", $i n, $c p);
 }
 
 public path *mkpath(int8 *str, filesystem *fs) {
@@ -707,6 +741,8 @@ public path *mkpath(int8 *str, filesystem *fs) {
     errnumber = ErrNoErr;
     if (!str || !(*str))
         reterr(ErrArg);
+    
+    pptr = &path_;
 
     if (str[1] == ':') {
         c = low(*str);
@@ -714,7 +750,7 @@ public path *mkpath(int8 *str, filesystem *fs) {
             reterr(ErrDisk);
         drive = (c-0x62);
 
-        str += 2;
+        str += 2; // c: <- skibi a abdesmi3
     }
     else if (!fs)
         reterr(ErrArg);
@@ -744,14 +780,15 @@ public path *mkpath(int8 *str, filesystem *fs) {
         reterr(ErrFilename);
 
     size = sizeof(struct s_filename);
-    // stringcopy($1 &path_.target.name, $1 name->name, $2 8);
-    // stringcopy($1 &path_.target.ext, $1 name->ext, $2 3);
     copy($1 &path_.target, $1 name, $2 size);
-
+    
+    // /ddos
     p--;
     *p = (int8)0;
+    if (!(*str))
+        return pptr;
     str++;
-
+    
     p = findcharl(str, (int8)'/');
     if (!p)
         stringcopy($1 &path_.dirpath[0], $1 str, $2 8);
@@ -760,8 +797,118 @@ public path *mkpath(int8 *str, filesystem *fs) {
         if (!ret)
             reterr(ErrPath);
     }
-
-    pptr = &path_;
-
+    
     return pptr;
+}
+
+internal tuple *mkfilelist(filesystem *fs, inode *dir) {
+    fileentry *filelist, *entry;
+    fileentry arr[MaxFilesPerDir];
+    ptr iptr;
+    int16 n, size, files;
+    inode *ino;
+    fsblock bl;
+    bool ret;
+    tuple *tup;
+    
+    errnumber = ErrNoErr;
+    if (!fs || !dir)
+        reterr(ErrInode);
+    
+    for (n=0; n<PtrPerInode; n++) {
+        iptr = dir->direct[n];
+        if (!iptr)
+            continue;
+        
+        ino = findinode(fs, iptr);
+        if (!ino)
+            continue;
+        
+        files++;
+        entry = &arr[files-1];
+        
+        entry->inode = iptr;
+        size = sizeof(struct s_filename);
+        copy($1 &entry->name, $1 &ino->name, $2 size);
+        entry->size = ino->size;
+        entry->filetype = ino->validtype;
+        
+        destroy(ino);
+    }
+   
+    iptr = dir->indirect;
+    if (iptr) {
+        zero($1 &bl, Blocksize);
+        ret = dread(fs->dd, $1 &bl, iptr);
+        if (ret) {
+            for (n=0; n<PtrPerBlock; n++) {
+                iptr = bl.pointers[n];
+                if (!iptr)
+                    break;
+                
+                ino = findinode(fs, iptr);
+                if (!ino)
+                    continue;
+                        
+                files++;
+                entry = &arr[files-1];
+                        
+                entry->inode = iptr;
+                size = sizeof(struct s_filename);
+                copy($1 &entry->name, $1 &ino->name, $2 size);
+                entry->size = ino->size;
+                entry->filetype = ino->validtype;
+                
+                destroy(ino);
+            }
+        }
+    }
+    size = sizeof(struct s_fileentry) * files;
+    filelist = (fileentry *)alloc(size);
+    if (!filelist)
+        reterr(ErrNoMem);
+    zero($1 filelist, size);
+    copy($1 filelist, $1 &arr, size);
+    
+    size = sizeof(struct s_tuple);
+    tup = (tuple *)alloc(size);
+    if (!tup)
+        reterr(ErrNoMem);
+    zero($1 tup, size);
+    
+    tup->numfiles = files;
+    tup->filelist = filelist;
+    
+    return tup;
+}
+
+internal ptr path2inode(path *p) {
+    ptr iptr;
+    int16 size, n, tmp;
+    filename name;
+    
+    iptr = $2 1;
+    errnumber = ErrNoErr;
+    if (*p->dirpath[0])
+        for (n=0; *p->dirpath[n]; n++) {
+            size = sizeof(struct s_filename);
+            zero($1 &name, size);
+            size = stringlen(p->dirpath[n]);
+            if (!size)
+                break;
+        
+            copy($1 &name.name, $1 p->dirpath[n], size);
+            tmp = read_dir(p->fs, iptr, &name);
+            if (!tmp) {
+                reterr(ErrPath);
+            }
+            
+            iptr = tmp;
+        }
+        
+    tmp = read_dir(p->fs, iptr, &p->target);
+    if (!tmp)
+        reterr(ErrNotFound);
+    else
+        return tmp;
 }

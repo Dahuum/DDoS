@@ -6,6 +6,7 @@
 #include "disk.h"
 #include "fs.h"
 #include <stdio.h>
+#include <sys/stat.h>
 
 void usage(char*);
 void usage_format(char*);
@@ -65,40 +66,50 @@ void cmd_format(char *arg1, char *arg2) {
    ptr idx, idx1;
    path *filepath;
    filename name;
-   char *fpath;
+   int8 *fpath;
    int16 size = sizeof(struct s_filename);
    fs = fsformat(dd, (bootsector *)0, bforce);
+   if (!fs) {
+       printf("formatting failed");
+       return ;
+   }
    
    zero($1 &name, size);
    copy($1 &name.name, $1 "auto", $2 4);
    copy($1 &name.ext, $1 "cpp", $2 3);
-   idx = increate(fs, &name, TypeFile);
-   printf("idx=%d\n", $i idx);
+   // idx = increate(fs, &name, TypeFile);
+   // printf("idx=%d\n", $i idx);
    
    zero($1 &name, size);
    stringcopy($1 &name.name, $1 "ddos", $2 4);
-   idx1 = increate(fs, &name, TypeDir);
-   printf("idx1=%d\n", $i idx1);
+   // idx1 = increate(fs, &name, TypeDir);
+   // printf("idx1=%d\n", $i idx1);
    
-    if (fs)
-        fsshow(fs, false);
-    else 
-        fprintf(stderr, "Formatting failed\n");
-    fpath = strdup("c:/ddos/system16/config/driver.sys");
-    filepath =  mkpath($1 fpath, (filesystem *)0);
-    
-    if (!filepath)
-        printf("\nNo filepath\n");
-    else {
-        printf("\nfpath == %s\n", fpath);
-        // for (int i = 0; filepath->dirpath[i]; i++)
-            printf("filepath->dirpath[1] = '%s'\n",  $c filepath->dirpath[1]);
-        printf("filepath->target = '%s'\n", $c file2str(&filepath->target));
+    // if (!fs)
+        // return; // fsshow(fs, false);
+    // else 
+        // fprintf(stderr, "Formatting failed\n");
+    fpath = $1 strdup("c:/ddos");
+    // directory *dir = (directory *)opendir(fpath);
+    // if (!dir)
+    //     printf("no opened dir\nerr=0x%.02hhx\n", (char)errnumber);
+    // if (dir)
+    //     for (int n=0; n<dir->len; n++)
+    //         printf("hello world hello world : --> '%s'\n", file2str(&dir->filelist[n].name));
+    // if (dir)
+    //     destroy(dir);
+    idx = makedir(fpath);
+    if (!idx) {
+        printf("Error in makedir, exiting... ");
+        return;
     }
+    printf("idx=%d\n",idx);
+    printf("no opened dir\nerr=0x%.02hhx\n", (char)errnumber);
+    
     destroy(fpath);
     
-    if (idx1) indestroy(fs, idx1);
-    if (fs) fsshow(fs, false);
+    // if (idx1) indestroy(fs, idx1);
+    // if (fs) fsshow(fs, false);
     /* <== // Test Area // ==> */
    
     return ;

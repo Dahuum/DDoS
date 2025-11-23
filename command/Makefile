@@ -6,7 +6,7 @@ ldflags=
 all: clean  clean-osapi command.com
 
 ../osapi/osapi.so: ../osapi/osapi.c ../osapi/osapi.h ../osapi/disk.c ../osapi/disk.h
-	$(MAKE) -C ../osapi/ -sk "CFLAGS=$(flags)" 
+	$(MAKE) -C ../osapi/ 
 	
 command.com: command.o ../osapi/osapi.so 
 	$(CC) $(flags) $^ -o $@ $(ldflags)

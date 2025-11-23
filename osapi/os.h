@@ -1,7 +1,6 @@
 /* os.h */
 #pragma once
 
-
 typedef unsigned char int8;
 typedef unsigned short int int16;
 typedef unsigned int int32;
@@ -15,6 +14,7 @@ typedef int8 error;
 #define $8 (int64)
 #define $c (char *)
 #define $i (int)
+#define $v (void *)
 
 #define bool int8
 #define true 1
@@ -62,10 +62,9 @@ enum public packed {
 #endif
 
 
-/* write 1 char */
 public bool load(fd, int8);
-
-/* read 1 char */
 public int8 store(fd);
-
 public void init();
+
+public void *opendir(int8*);
+public int16 makedir(int8*);

@@ -126,7 +126,10 @@ public filesystem *fsformat(disk* dd, bootsector *mbr, bool force) { /* master b
    if (!ok)
        reterr(ErrIO);
    /* Write root inode to block 2 */
-   ok = dwrite(dd, &idx, 2);
+   /* (xx) */
+   zero($1 &fsb, Blocksize);
+   copy($1 &fsb.inodes[0], $1 &idx, $2 sizeof(inode));
+   ok = dwrite(dd, &fsb.data, 2);
    if (!ok)
        reterr(ErrIO);
 
@@ -739,6 +742,7 @@ public path *mkpath(int8 *str, filesystem *fs) {
     bool ret;
 
     errnumber = ErrNoErr;
+    printf("\033[1m" "Daba blati n3ref had str lidakhel -> '%s'\033[0m\n", $c str);
     if (!str || !(*str))
         reterr(ErrArg);
     
@@ -769,7 +773,11 @@ public path *mkpath(int8 *str, filesystem *fs) {
         reterr(ErrDrive);
 
     path_.drive = drive;
-
+    /* (xx)  <-- handling root directory */
+    if (!(*str)) {
+        zero($1 &path_.target, sizeof(filename));
+        return pptr;
+    }
     p = findcharr(str, (int8)'/');
     if (!p)
         reterr(ErrPath);
@@ -805,7 +813,7 @@ internal tuple *mkfilelist(filesystem *fs, inode *dir) {
     fileentry *filelist, *entry;
     fileentry arr[MaxFilesPerDir];
     ptr iptr;
-    int16 n, size, files;
+    int16 n, size, files = 0;
     inode *ino;
     fsblock bl;
     bool ret;
@@ -887,7 +895,8 @@ internal ptr path2inode(path *p) {
     int16 size, n, tmp;
     filename name;
     
-    iptr = $2 1;
+    /* (xx) */
+    iptr = $2 0;
     errnumber = ErrNoErr;
     if (*p->dirpath[0])
         for (n=0; *p->dirpath[n]; n++) {

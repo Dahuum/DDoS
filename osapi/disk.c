@@ -35,9 +35,10 @@ public void dinit(void) {
     if (*DiskDescriptor) 
         fsmount(1);
    
-    for (n=1; n<=Maxdrive; n++)
+    /*
+     for (n=1; n<=Maxdrive; n++)
         ddetach(DiskDescriptor[n-1]);
-    
+    */
     return ;
 }
 /* kanet internal */
@@ -69,7 +70,7 @@ public disk *dattach(int8 drive) {
         return (disk *)0;
     
     size = sizeof(struct internal packed s_disk);
-    dd = (disk *)malloc($i size);
+    dd = (disk *)alloc($i size);
     if (!dd)
         return (disk *)0;
     

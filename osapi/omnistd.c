@@ -108,6 +108,8 @@ internal int8 low(int8 c) {
 internal int8 *findchar(int8 *haystack, int8 needle, bool fromleft) {
     int8 *p;
     int16 idx;
+    // printf("\ncheck find char inputs: [*haystack = '%s'] - [needle = '%c'] - [fromleft = '%s']\n", 
+    //     $c haystack, needle, (fromleft) ? "true": "false");
     
     if (!haystack)
         return $1 0;
@@ -117,7 +119,7 @@ internal int8 *findchar(int8 *haystack, int8 needle, bool fromleft) {
     for (p=(fromleft)?haystack:haystack+idx; *p && idx; (fromleft)?p++:p--,idx--)
         if (*p == needle)
             break ;
-    
+    printf("returned value is = '%s'\n\n", (*p == needle)? p: $1 0);
     return (*p == needle) ? 
             p :
         $1 0;

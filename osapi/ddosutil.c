@@ -57,56 +57,78 @@ void cmd_format(char *arg1, char *arg2) {
    
    printf("Formatting disk %s\n", drivestr);
    dinit();
-   dd = dattach(drive);
-   if (!dd) {
-       fprintf(stderr, "Bad disk\n"); 
-       exit(-1);
-   }
+   // dd = dattach(drive);
+   // if (!dd) {
+   //     fprintf(stderr, "Bad disk\n"); 
+   //     exit(-1);
+   // }
    /* <== // Test Area // ==> */
    ptr idx, idx1;
    path *filepath;
    filename name;
-   int8 *fpath;
+   int8 *fpath, *fpath1, *fpath2;
    int16 size = sizeof(struct s_filename);
-   fs = fsformat(dd, (bootsector *)0, bforce);
+   fs = fsformat(DiskDescriptor[drive-1], (bootsector *)0, bforce);
    if (!fs) {
        printf("formatting failed");
        return ;
    }
+   inode *root = findinode(fs, $2 0);
    
    zero($1 &name, size);
    copy($1 &name.name, $1 "auto", $2 4);
    copy($1 &name.ext, $1 "cpp", $2 3);
-   // idx = increate(fs, &name, TypeFile);
+   idx = increate(fs, &name, TypeFile);
+   root->direct[0] = idx;
+   int16 rett = fssaveinode(fs, root, $2 0);
+   
    // printf("idx=%d\n", $i idx);
    
    zero($1 &name, size);
    stringcopy($1 &name.name, $1 "ddos", $2 4);
-   // idx1 = increate(fs, &name, TypeDir);
+   idx1 = increate(fs, &name, TypeDir);
+   root->direct[1] =  idx1;
+   rett = fssaveinode(fs, root, $2 0);
    // printf("idx1=%d\n", $i idx1);
+   // return ;
    
     // if (!fs)
         // return; // fsshow(fs, false);
     // else 
         // fprintf(stderr, "Formatting failed\n");
-    fpath = $1 strdup("c:/ddos");
-    // directory *dir = (directory *)opendir(fpath);
-    // if (!dir)
-    //     printf("no opened dir\nerr=0x%.02hhx\n", (char)errnumber);
-    // if (dir)
-    //     for (int n=0; n<dir->len; n++)
-    //         printf("hello world hello world : --> '%s'\n", file2str(&dir->filelist[n].name));
-    // if (dir)
-    //     destroy(dir);
-    idx = makedir(fpath);
-    if (!idx) {
-        printf("Error in makedir, exiting... ");
-        return;
+    fpath = $1 strdup("c:/");
+    
+    directory *dir = (directory *)opendir(fpath);
+    if (!dir)
+        printf("no opened dir\nerr=0x%.02hhx\n", (char)errnumber);
+    if (dir) {
+        printf("\033[1m" "Root directory contents: \n" "\033[0m"  );
+        for (int n=0; n<dir->len; n++)
+            printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
+        destroy(dir);
     }
-    printf("idx=%d\n",idx);
-    printf("no opened dir\nerr=0x%.02hhx\n", (char)errnumber);
+    
+    fpath1 = $1 strdup("c:/test");
+    idx = makedir(fpath1);
+    if (!idx) {
+        printf("Error creating '%s', err=0x%.02hhx\n ", fpath1, (char)errnumber);
+        return;
+    } else {
+        printf("\033[1m" "\033[33m" "Created '%s' with inode %d\n" "\033[0m" "\033[0m" , fpath1, idx);
+    }
+    fpath2 = $1 strdup("c:/");
+    dir = opendir(fpath2);
+    if (dir) {
+        printf("\033[1m" "\033[33m" "'%s' opened successfully (empty dir with %d files)\n" "\033[0m" "\033[0m",fpath2,  dir->len);
+        for (int n=0; n<dir->len; n++)
+            printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
+        destroy(dir);
+    }
     
     destroy(fpath);
+    destroy(fpath1);
+    destroy(fpath2);
+    destroy(root);
     
     // if (idx1) indestroy(fs, idx1);
     // if (fs) fsshow(fs, false);
@@ -121,7 +143,7 @@ void usage(char *arg) {
 }
 
 void usage_format(char *arg) {
-    fprintf(stderr, "Usage: %s [-s] <drive>\nExample: %s format c:\n", arg, arg);
+    fprintf(stderr, "Usage: %s [] <drive>\nExample: %s format c:\n", arg, arg);
     exit(-1);
 }
 

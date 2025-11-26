@@ -148,8 +148,15 @@ public void *opendir(int8 *pathstr) {
     p = mkpath(pathstr, (filesystem *)0);
     if (!p)
         throw();
+    
+    /* (xx) */
     if (!(*p->target.name))
-        reterr(ErrPath);
+       iptr = 0; 
+    else {
+        iptr = path2inode(p);
+            if (!iptr && errnumber)
+                throw();
+    }
     printf("\n");
     showpath(p);
     printf("\n");
@@ -178,9 +185,6 @@ public void *opendir(int8 *pathstr) {
     //     reterr(ErrNotFound);
     // else
     //     iptr = tmp;
-    iptr = path2inode(p);
-    if (!iptr && errnumber)
-        throw();
     ino = findinode(p->fs, iptr);
     if (!ino) {
         reterr(ErrInode);
@@ -212,7 +216,7 @@ public void *opendir(int8 *pathstr) {
     dir->drive = p->fs->dd->drive;
     dir->fs = p->fs;
     dir->inode = iptr;
-    copy($1 dir->dirname, $1 &p->target, $2 8);
+    copy($1 &dir->dirname, $1 &p->target, $2 8);
     
     tup = mkfilelist(dir->fs, ino);
     if (!tup) {
@@ -235,7 +239,7 @@ public void *opendir(int8 *pathstr) {
 public ptr makedir(int8 *pathstr) {
     path *pp; /* path pointer */
     ptr idx, idx2, blockno;
-    int8 buf[256], tgt[256];
+    int8 buf[256], tgt[256], tmp[256];
     int8 *p;
     filename name;
     int16 size, n;
@@ -255,17 +259,19 @@ public ptr makedir(int8 *pathstr) {
     *p++ = 0;
     stringcopy(tgt, p, 255);
     p = buf;
-  
+    stringcopy($1 &tmp, $1 pathstr, 255);
     pp = mkpath(p, (filesystem *)0);
     if (!pp)
         throw();
-    
-    idx = path2inode(pp);
-    if (!idx && errnumber)
-        reterr(ErrPath);
-    
+    if (!(*pp->target.name)) 
+       idx = 0;
+    else {
+        idx = path2inode(pp);
+            if (!idx && errnumber)
+                reterr(ErrPath);
+     } 
     pp = mkpath(pathstr, (filesystem *)0);
-    if (!p)
+    if (!pp)
         throw();
     
     size = sizeof(struct s_filename);
@@ -274,7 +280,7 @@ public ptr makedir(int8 *pathstr) {
     copy($1 &name.name, tgt, $2 8);
     
     idx2 = increate(pp->fs, &name, TypeDir);
-    if (!idx)
+    if (!idx2)
         reterr(ErrInode);
     
     ino = findinode(pp->fs, idx);

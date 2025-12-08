@@ -288,6 +288,8 @@ internal filename *str2file(int8 *str) {
     filename *fnptr;
     int16 size;
 
+    printf("\nstr2file: str='%s'\n", $c str);
+
     if (!str)
         reterr(ErrArg);
 
@@ -295,7 +297,7 @@ internal filename *str2file(int8 *str) {
     zero($1 &name, size);
     p = findcharl(str, '.');
     if (!p)
-        copy($1 &name.name, $1 str, $2 8);
+        copy($1 &name.name, $1 str, $2 stringlen(str));
     else {
         copy($1 &name.ext , (p+1), $2 3);
         *p = (int8)0;
@@ -577,6 +579,8 @@ internal ptr read_dir(filesystem *fs, ptr haystack, filename *needle) {
 
     errnumber = ErrNoErr;
 
+    printf("read_dir: searching inode %d for '%s'\n", haystack, file2str(needle));
+
     if (!fs || !needle)
         reterr(ErrArg);
 
@@ -598,7 +602,7 @@ internal ptr read_dir(filesystem *fs, ptr haystack, filename *needle) {
         if (!child)
             continue;
 
-        if (cmp($1 needle, $1 child, $2 11)) {
+        if (cmp($1 needle, $1 &child->name, $2 11)) {
             destroy(dir);
             destroy(child);
 
@@ -629,7 +633,7 @@ internal ptr read_dir(filesystem *fs, ptr haystack, filename *needle) {
         if (!child)
             continue;
 
-        if (cmp($1 needle, $1 child, $2 11)) {
+        if (cmp($1 needle, $1 &child->name, $2 11)) {
             destroy(dir);
             destroy(child);
 
@@ -742,7 +746,10 @@ public path *mkpath(int8 *str, filesystem *fs) {
     bool ret;
 
     errnumber = ErrNoErr;
+
+
     printf("\033[1m" "Daba blati n3ref had str lidakhel -> '%s'\033[0m\n", $c str);
+    zero($1 &path_, sizeof(path));
     if (!str || !(*str))
         reterr(ErrArg);
     
@@ -793,6 +800,7 @@ public path *mkpath(int8 *str, filesystem *fs) {
     // /ddos
     p--;
     *p = (int8)0;
+    printf("str=%s\n", $c str);
     if (!(*str))
         return pptr;
     str++;

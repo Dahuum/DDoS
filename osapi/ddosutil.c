@@ -68,6 +68,8 @@ void cmd_format(char *arg1, char *arg2) {
    filename name;
    int8 *fpath, *fpath1, *fpath2;
    int16 size = sizeof(struct s_filename);
+   /* (xx) -> fsformat to fsmount */
+//    fs = fsmount(drive)/*, (bootsector *)0, bforce)*/; 
    fs = fsformat(DiskDescriptor[drive-1], (bootsector *)0, bforce);
    if (!fs) {
        printf("formatting failed");
@@ -108,15 +110,16 @@ void cmd_format(char *arg1, char *arg2) {
         destroy(dir);
     }
     
-    fpath1 = $1 strdup("c:/test/dos/dos/");
+    fpath1 = $1 strdup("c:/ddos/folder");
+    printf("\n" "\033[1m" "\033[33m" "Starting makedir(%s) \n" "\033[0m" "\033[0m" , fpath1);
     idx = makedir(fpath1);
     if (!idx) {
-        printf("Error creating '%s', err=0x%.02hhx\n ", fpath1, (char)errnumber);
+        printf("Error creating '%s', err=0x%.02hhx\n\n", fpath1, (char)errnumber);
         return;
     } else {
         printf("\033[1m" "\033[33m" "Created '%s' with inode %d\n" "\033[0m" "\033[0m" , fpath1, idx);
     }
-    fpath2 = $1 strdup("c:/");
+    fpath2 = $1 strdup("c:/ddos");
     dir = opendir(fpath2);
     if (dir) {
         printf("\033[1m" "\033[33m" "'%s' opened successfully (empty dir with %d files)\n" "\033[0m" "\033[0m",fpath2,  dir->len);

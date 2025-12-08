@@ -157,9 +157,9 @@ public void *opendir(int8 *pathstr) {
             if (!iptr && errnumber)
                 throw();
     }
-    printf("\n");
+    printf("opendir\n");
     showpath(p);
-    printf("\n");
+    printf("opendir\n");
     
     // iptr = $2 1;
     
@@ -251,6 +251,9 @@ public ptr makedir(int8 *pathstr) {
     zero($1 buf, 256);
     zero($1 tgt, 256);
     stringcopy($1 &buf, $1 pathstr, 255);
+/* 
+     c:/ddos
+*/
     
     p = findcharr(buf, '/');
     if (!p)
@@ -261,15 +264,17 @@ public ptr makedir(int8 *pathstr) {
     p = buf;
     stringcopy($1 &tmp, $1 pathstr, 255);
     pp = mkpath(p, (filesystem *)0);
+
     if (!pp)
         throw();
     if (!(*pp->target.name)) 
        idx = 0;
     else {
         idx = path2inode(pp);
-            if (!idx && errnumber)
-                reterr(ErrPath);
-     } 
+        if (!idx && errnumber)
+            reterr(ErrPath);
+    } 
+
     pp = mkpath(pathstr, (filesystem *)0);
     if (!pp)
         throw();

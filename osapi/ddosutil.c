@@ -108,7 +108,7 @@ void cmd_format(char *arg1, char *arg2) {
         destroy(dir);
     }
     
-    fpath1 = $1 strdup("c:/test");
+    fpath1 = $1 strdup("c:/test/dos/dos/");
     idx = makedir(fpath1);
     if (!idx) {
         printf("Error creating '%s', err=0x%.02hhx\n ", fpath1, (char)errnumber);

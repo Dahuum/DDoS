@@ -119,7 +119,6 @@ internal int8 *findchar(int8 *haystack, int8 needle, bool fromleft) {
     for (p=(fromleft)?haystack:haystack+idx; *p && idx; (fromleft)?p++:p--,idx--)
         if (*p == needle)
             break ;
-    printf("returned value is = '%s'\n\n", (*p == needle)? p: $1 0);
     return (*p == needle) ? 
             p :
         $1 0;

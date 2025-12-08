@@ -5,7 +5,7 @@
 
 internal bitmap *mkbitmap(filesystem *fs, bool scan) {
     bitmap *bm;
-    int16 size, n, x, index;
+    int16 size, n, x, index = 0;
     fsblock block;
     bool ret, valid;
 
@@ -684,7 +684,7 @@ private bool parsepath(int8 *str, path *pptr, int16 idx_) {
 
     if (idx >= (DirDepth)) {
         *pptr->dirpath[idx] = (int8)0;
-        return true;
+        return false;
     }
     
     p = findcharl(str, (int8)'/');

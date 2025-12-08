@@ -120,7 +120,7 @@ internal inode *findinode(filesystem*,ptr);
 internal filename *str2file(int8*);
 internal int8 *file2str(filename*);
 internal filesystem *fsmount(int8);
-internal void fsunmout(filesystem*);
+internal void fsunmount(filesystem*);
 
 internal ptr increate(filesystem*,filename*,type);
 public ptr inalloc(filesystem*);

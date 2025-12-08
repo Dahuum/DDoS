@@ -110,7 +110,7 @@ void cmd_format(char *arg1, char *arg2) {
         destroy(dir);
     }
     
-    fpath1 = $1 strdup("c:/ddos/folder");
+    fpath1 = $1 strdup("c:/ddos/folder////");
     printf("\n" "\033[1m" "\033[33m" "Starting makedir(%s) \n" "\033[0m" "\033[0m" , fpath1);
     idx = makedir(fpath1);
     if (!idx) {
@@ -119,7 +119,7 @@ void cmd_format(char *arg1, char *arg2) {
     } else {
         printf("\033[1m" "\033[33m" "Created '%s' with inode %d\n" "\033[0m" "\033[0m" , fpath1, idx);
     }
-    fpath2 = $1 strdup("c:/ddos");
+    fpath2 = $1 strdup("c:/ddos/////");
     dir = opendir(fpath2);
     if (dir) {
         printf("\033[1m" "\033[33m" "'%s' opened successfully (empty dir with %d files)\n" "\033[0m" "\033[0m",fpath2,  dir->len);

@@ -254,6 +254,13 @@ public ptr makedir(int8 *pathstr) {
 /* 
      c:/ddos
 */
+    size = stringlen(buf);
+    while (size > 1 && buf[size-1] == '/')
+        size--;
+    if (size < stringlen(buf))
+        buf[size] = (int8)0;
+
+ 
     
     p = findcharr(buf, '/');
     if (!p)

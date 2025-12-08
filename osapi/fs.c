@@ -746,10 +746,16 @@ public path *mkpath(int8 *str, filesystem *fs) {
     bool ret;
 
     errnumber = ErrNoErr;
+    zero($1 &path_, sizeof(path));
 
+    size = stringlen(str);
+    while (size > 1 && str[size-1] == '/')
+        size--;
+    if (size < stringlen(str))
+        str[size] = (int8)0;
 
     printf("\033[1m" "Daba blati n3ref had str lidakhel -> '%s'\033[0m\n", $c str);
-    zero($1 &path_, sizeof(path));
+
     if (!str || !(*str))
         reterr(ErrArg);
     

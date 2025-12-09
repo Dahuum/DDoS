@@ -935,3 +935,64 @@ internal ptr path2inode(path *p) {
     else
         return tmp;
 }
+
+internal ptr buildpath(path *p) {
+    ptr iptr, idx;
+    int16 size, n, i, tmp, blockno;
+    filename name;
+    inode *ino;
+    
+    /* (xx) */
+    iptr = $2 0;
+    errnumber = ErrNoErr;
+    if (*p->dirpath[0])
+        for (n=0; *p->dirpath[n]; n++) {
+            size = sizeof(struct s_filename);
+            zero($1 &name, size);
+            size = stringlen(p->dirpath[n]);
+            if (!size)
+                break;
+        
+            copy($1 &name.name, $1 p->dirpath[n], size);
+            tmp = read_dir(p->fs, iptr, &name);
+            if (!tmp) {
+                idx = increate(p->fs, &name, TypeDir);
+                if (!idx)
+                    reterr(ErrInode);
+                ino = findinode(p->fs, iptr);
+                if (!ino)
+                    reterr(ErrInode);
+
+                for (i=0; i<PtrPerInode; i++)
+                    if (!ino->direct[i])
+                        break;
+                if (!ino->direct[i]) {
+                    ino->direct[i] = idx;
+                    if (!fssaveinode(p->fs, ino, iptr)) {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        throw();
+                    }
+                    destroy(ino);
+                }
+
+                else if (!ino->indirect) {
+                    blockno = bitmapalloc(p->fs, p->fs->bitmap);
+                    ino->indirect = blockno;
+                    if (!fssaveinode(p->fs, ino, iptr)) {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        throw();
+                    }
+
+                    destroy(ino);
+                }
+                iptr = idx;
+                continue;
+            }
+            iptr = tmp;
+        }
+        
+    return idx;
+}
+

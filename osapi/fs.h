@@ -135,6 +135,7 @@ public bool validchar(int8);
 private bool validchar_(int8);
 internal void showpath(const path*);
 internal ptr path2inode(path*);
+internal ptr buildpath(path*);
 
 internal ptr read_dir(filesystem*,ptr,filename*);
 public path *mkpath(int8*,filesystem*);

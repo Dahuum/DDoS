@@ -68,3 +68,4 @@ public void init();
 
 public void *opendir(int8*);
 public int16 makedir(int8*);
+public int16 makedir_p(int8*);

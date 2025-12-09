@@ -251,9 +251,7 @@ public ptr makedir(int8 *pathstr) {
     zero($1 buf, 256);
     zero($1 tgt, 256);
     stringcopy($1 &buf, $1 pathstr, 255);
-/* 
-     c:/ddos
-*/
+    
     size = stringlen(buf);
     while (size > 1 && buf[size-1] == '/')
         size--;
@@ -341,4 +339,11 @@ public ptr makedir(int8 *pathstr) {
     destroy(ino);
     
     return idx2;
+}
+
+/*
+    mkdir -p /ddos/dir_depth_1/dir_depth_2/dir_depth_3/
+*/
+public ptr makedir_p(int8 *pathstr) {
+    
 }

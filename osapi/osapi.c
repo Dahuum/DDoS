@@ -236,7 +236,7 @@ public void *opendir(int8 *pathstr) {
     return $v dir;
 }
 
-public ptr makedir(int8 *pathstr) {
+public ptr makedir(int8 *pathstr ) {
     path *pp; /* path pointer */
     ptr idx, idx2, blockno;
     int8 buf[256], tgt[256], tmp[256];
@@ -287,7 +287,7 @@ public ptr makedir(int8 *pathstr) {
     size = sizeof(struct s_filename);
     zero($1 &name, size);
     size = stringlen(tgt);
-    copy($1 &name.name, tgt, $2 8);
+    copy($1 &name.name, tgt, $2 size);
     
     idx2 = increate(pp->fs, &name, TypeDir);
     if (!idx2)
@@ -316,7 +316,7 @@ public ptr makedir(int8 *pathstr) {
     if (!ino->indirect) {
         blockno = bitmapalloc(pp->fs, pp->fs->bitmap);
         ino->indirect = blockno;
-        if (!fssaveinode(pp->fs, ino, idx2)) {
+        if (!fssaveinode(pp->fs, ino, idx)) {
             inunalloc(pp->fs, idx2);
             bitmapfree(pp->fs, pp->fs->bitmap, blockno);
             destroy(ino);
@@ -344,6 +344,103 @@ public ptr makedir(int8 *pathstr) {
 /*
     mkdir -p /ddos/dir_depth_1/dir_depth_2/dir_depth_3/
 */
+
+internal ptr path2inode_r(path *p) {
+    ptr iptr, idx;
+    int16 size, n, i, tmp, blockno;
+    filename name;
+    inode *ino;
+    
+    /* (xx) */
+    iptr = $2 0;
+    errnumber = ErrNoErr;
+    if (*p->dirpath[0])
+        for (n=0; *p->dirpath[n]; n++) {
+            size = sizeof(struct s_filename);
+            zero($1 &name, size);
+            size = stringlen(p->dirpath[n]);
+            if (!size)
+                break;
+        
+            copy($1 &name.name, $1 p->dirpath[n], size);
+            tmp = read_dir(p->fs, iptr, &name);
+            if (!tmp) {
+                idx = increate(p->fs, &name, TypeDir);
+                if (!idx)
+                    reterr(ErrInode);
+                ino = findinode(p->fs, iptr);
+                if (!ino)
+                    reterr(ErrInode);
+
+                for (i=0; i<PtrPerInode; i++)
+                    if (!ino->direct[i])
+                        break;
+                if (!ino->direct[i]) {
+                    ino->direct[i] = idx;
+                    if (!fssaveinode(p->fs, ino, iptr)) {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        throw();
+                    }
+                    destroy(ino);
+                }
+
+                else if (!ino->indirect) {
+                    blockno = bitmapalloc(p->fs, p->fs->bitmap);
+                    ino->indirect = blockno;
+                    if (!fssaveinode(p->fs, ino, iptr)) {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        throw();
+                    }
+
+                    destroy(ino);
+                }
+                iptr = idx;
+                continue;
+            }
+            iptr = tmp;
+        }
+        
+    // tmp = read_dir(p->fs, iptr, &p->target);
+    // if (!tmp)
+    //     reterr(ErrNotFound);
+    // else
+    //     return tmp;
+    return idx;
+}
 public ptr makedir_p(int8 *pathstr) {
+    path *pp;
+    ptr idx, idx2, blockno, ret;
+    int8 buf[256], tgt[256];
+    int8 *p;
+    filename name;
+    int16 size, n;
+    inode *ino;
+    fsblock bl;
+
+    errnumber = ErrNoErr;
+
+    zero($1 buf, 256);
+    zero($1 tgt, 256);
+    stringcopy($1 &buf, $1 pathstr, 255);
+    stringcopy($1 &tgt, $1 pathstr, 255);
+    
+
+    size = stringlen(buf);
+    while(size > 1 && buf[size-1] == '/') size--;
+    if (size< stringlen(buf)) buf[size] = (int8)0;
+
+    pp = mkpath(buf, (filesystem *)0);
+    if (!pp)
+        throw();
+
+    idx = path2inode_r(pp);
+    if (!idx && errnumber)
+        reterr(ErrPath);
+    ret = makedir(tgt);
+    if (!ret)
+        reterr(ErrPath);
+    return ret;
     
 }

@@ -66,7 +66,7 @@ void cmd_format(char *arg1, char *arg2) {
    ptr idx, idx1;
    path *filepath;
    filename name;
-   int8 *fpath, *fpath1, *fpath2;
+   int8 *fpath, *fpath1, *fpath2, *fpath3;
    int16 size = sizeof(struct s_filename);
    /* (xx) -> fsformat to fsmount */
 //    fs = fsmount(drive)/*, (bootsector *)0, bforce)*/; 
@@ -127,6 +127,27 @@ void cmd_format(char *arg1, char *arg2) {
             printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
         destroy(dir);
     }
+
+    fpath3 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/dir_3/") ;
+    printf("\n" "\033[1m" "\033[33m" "Testing makedir_p(%s) \n" "\033[0m" "\033[0m" , fpath3);
+    idx = makedir_p(fpath3);
+    if (!idx) {
+        printf("Error creating '%s', err=0x%.02hhx\n\n", fpath1, (char)errnumber);
+    } else {
+        printf("\033[1m" "\033[33m" "Created '%s' with inode %d\n" "\033[0m" "\033[0m" , fpath3, idx);
+
+    }
+    fpath2 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/");
+    dir = opendir(fpath2);
+    if (dir) {
+        printf("\033[1m" "\033[33m" "'%s' opened successfully (empty dir with %d files)\n" "\033[0m" "\033[0m",fpath2,  dir->len);
+        for (int n=0; n<dir->len; n++)
+            printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
+        destroy(dir);
+    }
+
+
+    destroy(fpath3);
     
     destroy(fpath);
     destroy(fpath1);

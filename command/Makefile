@@ -18,6 +18,6 @@ clean-osapi:
 	$(MAKE) -C ../osapi clean
 	
 clean:
-	rm -f *.so *.o  command.com
+	rm -f *.so *.o  command.com ../util/ddosutil
 	
 fclean: clean clean-osapi

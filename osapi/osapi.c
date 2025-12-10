@@ -242,7 +242,7 @@ public ptr makedir(int8 *pathstr ) {
     int8 buf[256], tgt[256], tmp[256];
     int8 *p;
     filename name;
-    int16 size, n;
+    int16 size, n, i;
     inode *ino;
     fsblock bl;
     
@@ -301,7 +301,7 @@ public ptr makedir(int8 *pathstr ) {
         if (!ino->direct[n]) 
             break;
     
-    if (!ino->direct[n]) {
+    if (n<PtrPerInode && !ino->direct[n]) {
         ino->direct[n] = idx2;
         if (!fssaveinode(pp->fs, ino, idx)) {
             inunalloc(pp->fs, idx2);
@@ -323,20 +323,46 @@ public ptr makedir(int8 *pathstr ) {
             
             throw();
         }
-    }
-        
-    zero($1 &bl.data, Blocksize);
-    bl.pointers[0] = idx2;
-    if (!dwrite(pp->fs->dd, &bl.data, blockno)) {
-        ino->indirect = 0;
-        inunalloc(pp->fs, idx2);
-        bitmapfree(pp->fs, pp->fs->bitmap, blockno);
+        zero($1 &bl.data, Blocksize);
+        bl.pointers[0] = idx2;
+        if (!dwrite(pp->fs->dd, &bl.data, blockno)) {
+            ino->indirect = 0;
+            inunalloc(pp->fs, idx2);
+            bitmapfree(pp->fs, pp->fs->bitmap, blockno);
+            destroy(ino);
+            
+            throw();
+        }
         destroy(ino);
-        
-        throw();
+
+        return idx2;
     }
-    
-    destroy(ino);
+    else {
+        if (!dread(pp->fs->dd, &bl.data, ino->indirect)) {
+            inunalloc(pp->fs, idx2);
+            destroy(ino);
+            throw();
+        }
+
+        for (i=0; i<(Blocksize/sizeof(ptr)); i++)
+            if (!bl.pointers[i])
+                break ;
+        
+        if (i<(Blocksize/sizeof(ptr)) && !bl.pointers[i]) {
+            bl.pointers[i] = idx2;
+            if (!dwrite(pp->fs->dd, &bl.data, ino->indirect)) {
+                inunalloc(pp->fs, idx2);
+                destroy(ino);
+                throw();
+            }
+            destroy(ino);
+        }
+        else {
+            inunalloc(pp->fs, idx2);
+            destroy(ino);
+            reterr(ErrDirFull);
+        }
+    }
     
     return idx2;
 }
@@ -347,13 +373,9 @@ public ptr makedir(int8 *pathstr ) {
 
 public ptr makedir_p(int8 *pathstr) {
     path *pp;
-    ptr idx, idx2, blockno, ret;
+    ptr idx, idx2, ret;
     int8 buf[256], tgt[256];
-    int8 *p;
-    filename name;
-    int16 size, n;
-    inode *ino;
-    fsblock bl;
+    int16 size;
 
     errnumber = ErrNoErr;
 
@@ -372,11 +394,10 @@ public ptr makedir_p(int8 *pathstr) {
         throw();
 
     idx = buildpath(pp);
-    if (!idx && errnumber)
+    if (errnumber)
         reterr(ErrPath);
     ret = makedir(tgt);
     if (!ret)
         reterr(ErrPath);
     return ret;
-    
 }

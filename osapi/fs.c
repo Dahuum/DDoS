@@ -941,6 +941,7 @@ internal ptr buildpath(path *p) {
     int16 size, n, i, tmp, blockno;
     filename name;
     inode *ino;
+    fsblock bl;
     
     /* (xx) */
     iptr = $2 0;
@@ -966,7 +967,7 @@ internal ptr buildpath(path *p) {
                 for (i=0; i<PtrPerInode; i++)
                     if (!ino->direct[i])
                         break;
-                if (!ino->direct[i]) {
+                if (i<PtrPerInode && !ino->direct[i]) { /* Me39ola ytzad check diak i<PtrPerInode*/
                     ino->direct[i] = idx;
                     if (!fssaveinode(p->fs, ino, iptr)) {
                         inunalloc(p->fs, idx);
@@ -984,8 +985,43 @@ internal ptr buildpath(path *p) {
                         destroy(ino);
                         throw();
                     }
+                    zero($1 &bl.data, Blocksize);
+                    bl.pointers[0] = idx;
+                    if (!dwrite(p->fs->dd, &bl.data, blockno)) {
+                        ino->indirect = 0;
+                        inunalloc(p->fs, idx);
+                        bitmapfree(p->fs, p->fs->bitmap, blockno);
+                        destroy(ino);
 
+                        throw();
+                    }
                     destroy(ino);
+                }
+                
+                else {
+                    if (!dread(p->fs->dd, &bl.data, ino->indirect)) {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        throw();
+                    }
+
+                    for (i=0; i<(Blocksize/sizeof(ptr)); i++)
+                        if (!bl.pointers[i])
+                            break ;
+                    if (i<(Blocksize/sizeof(ptr)) && !bl.pointers[i]) {
+                        bl.pointers[i] = idx;
+                        if (!dwrite(p->fs->dd, &bl.data, ino->indirect)) {
+                            inunalloc(p->fs, idx);
+                            destroy(ino);
+                            throw();
+                        }
+                        destroy(ino);
+                    } 
+                    else {
+                        inunalloc(p->fs, idx);
+                        destroy(ino);
+                        reterr(ErrDirFull);
+                    }
                 }
                 iptr = idx;
                 continue;
@@ -993,6 +1029,6 @@ internal ptr buildpath(path *p) {
             iptr = tmp;
         }
         
-    return idx;
+    return iptr;
 }
 

@@ -14,11 +14,13 @@
 #define ValidPathChars  ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-/:.")
 #define DirDepth        (16) 
 #define MaxFilesPerDir  (PtrPerInode+PtrPerBlock)
+#define MaxOpenFiles     (256)
 
 typedef int16 ptr;   
 typedef int8 bootsector[500];
 typedef bool bitmap;
 // typedef int8 path;   
+
 
 enum internal packed  e_type {
     TypeNotValid = 0x00,  
@@ -107,8 +109,19 @@ struct public packed s_tuple {
 };
 typedef struct s_tuple tuple;
 
+struct public packed s_filedescriptor {
+    ptr inono;
+    int32 offset;
+    int16 flags;
+    bool inuse;
+    filesystem *fs;
+};
+typedef struct s_filedescriptor filedesc;
+
 #define indestroy(f,p) (bool)inunalloc((f), (p))
 #define filename2low(x) tolowercase($1 (x))
+
+extern filedesc fdtable[MaxOpenFiles];
 
 /* internal -> private? */
 public   filesystem *fsformat(disk*,bootsector*,bool);
@@ -136,6 +149,7 @@ private bool validchar_(int8);
 internal void showpath(const path*);
 internal ptr path2inode(path*);
 internal ptr buildpath(path*);
+public ptr linkentry(path *pp, filename *name, int16 idx, type inotype);
 
 internal ptr read_dir(filesystem*,ptr,filename*);
 public path *mkpath(int8*,filesystem*);

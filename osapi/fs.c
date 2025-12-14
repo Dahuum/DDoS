@@ -1032,3 +1032,86 @@ internal ptr buildpath(path *p) {
     return iptr;
 }
 
+public ptr linkentry(path *pp, filename *name, int16 idx, type inotype) {
+    int16 n, i;
+    ptr idx2, blockno;
+    inode *ino;
+    fsblock bl;
+    
+    
+    idx2 = increate(pp->fs, name, inotype);
+    if (!idx2)
+        reterr(ErrInode);
+    
+    ino = findinode(pp->fs, idx);
+    if (!ino)
+        reterr(ErrInode);
+    
+    for (n=0; n<PtrPerInode; n++) 
+        if (!ino->direct[n]) 
+            break;
+    
+    if (n<PtrPerInode && !ino->direct[n]) {
+        ino->direct[n] = idx2;
+        if (!fssaveinode(pp->fs, ino, idx)) {
+            inunalloc(pp->fs, idx2);
+            destroy(ino);
+            throw();
+        }
+        destroy(ino);
+        
+        return idx2;
+    }
+    
+    if (!ino->indirect) {
+        blockno = bitmapalloc(pp->fs, pp->fs->bitmap);
+        ino->indirect = blockno;
+        if (!fssaveinode(pp->fs, ino, idx)) {
+            inunalloc(pp->fs, idx2);
+            bitmapfree(pp->fs, pp->fs->bitmap, blockno);
+            destroy(ino);
+            
+            throw();
+        }
+        zero($1 &bl.data, Blocksize);
+        bl.pointers[0] = idx2;
+        if (!dwrite(pp->fs->dd, &bl.data, blockno)) {
+            ino->indirect = 0;
+            inunalloc(pp->fs, idx2);
+            bitmapfree(pp->fs, pp->fs->bitmap, blockno);
+            destroy(ino);
+            
+            throw();
+        }
+        destroy(ino);
+
+        return idx2;
+    }
+    else {
+        if (!dread(pp->fs->dd, &bl.data, ino->indirect)) {
+            inunalloc(pp->fs, idx2);
+            destroy(ino);
+            throw();
+        }
+
+        for (i=0; i<(Blocksize/sizeof(ptr)); i++)
+            if (!bl.pointers[i])
+                break ;
+        
+        if (i<(Blocksize/sizeof(ptr)) && !bl.pointers[i]) {
+            bl.pointers[i] = idx2;
+            if (!dwrite(pp->fs->dd, &bl.data, ino->indirect)) {
+                inunalloc(pp->fs, idx2);
+                destroy(ino);
+                throw();
+            }
+            destroy(ino);
+            return idx2;
+        }
+        else {
+            inunalloc(pp->fs, idx2);
+            destroy(ino);
+            reterr(ErrDirFull);
+        }
+    }
+}

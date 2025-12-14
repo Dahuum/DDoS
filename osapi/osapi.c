@@ -106,6 +106,7 @@ public int8 store(fd file) {
 
 private void setupfds() {
     zero($1 fds, sizeof(fds));
+    zero($1 fdtable, sizeof(fdtable));
     
     fds[0] = 1;
     fds[1] = 2;
@@ -196,13 +197,13 @@ public void *opendir(int8 *pathstr) {
         
         reterr(ErrBadDir);
     }
-/*
-    int16 drive;
-    filesystem *fs;
-    ptr inode;
-    filename *dirname;
-    int16 len;
-*/ 
+    /*
+        int16 drive;
+        filesystem *fs;
+        ptr inode;
+        filename *dirname;
+        int16 len;
+    */ 
     size = sizeof(struct s_directory);
     dir = (directory *)alloc(size);
     if (!dir) {
@@ -222,7 +223,6 @@ public void *opendir(int8 *pathstr) {
     if (!tup) {
         if (ino)
             destroy(ino);
-        
         throw();
     }
     dir->len = tup->numfiles;
@@ -238,19 +238,18 @@ public void *opendir(int8 *pathstr) {
 
 public ptr makedir(int8 *pathstr ) {
     path *pp; /* path pointer */
-    ptr idx, idx2, blockno;
-    int8 buf[256], tgt[256], tmp[256];
+    ptr idx;
+    int8 buf[256], buf1[256], tgt[256]; 
     int8 *p;
     filename name;
-    int16 size, n, i;
-    inode *ino;
-    fsblock bl;
+    int16 size;
     
     errnumber = ErrNoErr;
       
     zero($1 buf, 256);
     zero($1 tgt, 256);
-    stringcopy($1 &buf, $1 pathstr, 255);
+    stringcopy($1 buf, $1 pathstr, 255);
+    stringcopy($1 buf1, $1 pathstr, 255);
     
     size = stringlen(buf);
     while (size > 1 && buf[size-1] == '/')
@@ -265,9 +264,8 @@ public ptr makedir(int8 *pathstr ) {
         reterr(ErrPath);
     
     *p++ = 0;
-    stringcopy(tgt, p, 255);
+    stringcopy($1 tgt, p, 255);
     p = buf;
-    stringcopy($1 &tmp, $1 pathstr, 255);
     pp = mkpath(p, (filesystem *)0);
 
     if (!pp)
@@ -280,7 +278,7 @@ public ptr makedir(int8 *pathstr ) {
             reterr(ErrPath);
     } 
 
-    pp = mkpath(pathstr, (filesystem *)0);
+    pp = mkpath(buf1, (filesystem *)0);
     if (!pp)
         throw();
     
@@ -289,89 +287,13 @@ public ptr makedir(int8 *pathstr ) {
     size = stringlen(tgt);
     copy($1 &name.name, tgt, $2 size);
     
-    idx2 = increate(pp->fs, &name, TypeDir);
-    if (!idx2)
-        reterr(ErrInode);
-    
-    ino = findinode(pp->fs, idx);
-    if (!ino)
-        reterr(ErrInode);
-    
-    for (n=0; n<PtrPerInode; n++) 
-        if (!ino->direct[n]) 
-            break;
-    
-    if (n<PtrPerInode && !ino->direct[n]) {
-        ino->direct[n] = idx2;
-        if (!fssaveinode(pp->fs, ino, idx)) {
-            inunalloc(pp->fs, idx2);
-            destroy(ino);
-            throw();
-        }
-        destroy(ino);
-        
-        return idx2;
-    }
-    
-    if (!ino->indirect) {
-        blockno = bitmapalloc(pp->fs, pp->fs->bitmap);
-        ino->indirect = blockno;
-        if (!fssaveinode(pp->fs, ino, idx)) {
-            inunalloc(pp->fs, idx2);
-            bitmapfree(pp->fs, pp->fs->bitmap, blockno);
-            destroy(ino);
-            
-            throw();
-        }
-        zero($1 &bl.data, Blocksize);
-        bl.pointers[0] = idx2;
-        if (!dwrite(pp->fs->dd, &bl.data, blockno)) {
-            ino->indirect = 0;
-            inunalloc(pp->fs, idx2);
-            bitmapfree(pp->fs, pp->fs->bitmap, blockno);
-            destroy(ino);
-            
-            throw();
-        }
-        destroy(ino);
-
-        return idx2;
-    }
-    else {
-        if (!dread(pp->fs->dd, &bl.data, ino->indirect)) {
-            inunalloc(pp->fs, idx2);
-            destroy(ino);
-            throw();
-        }
-
-        for (i=0; i<(Blocksize/sizeof(ptr)); i++)
-            if (!bl.pointers[i])
-                break ;
-        
-        if (i<(Blocksize/sizeof(ptr)) && !bl.pointers[i]) {
-            bl.pointers[i] = idx2;
-            if (!dwrite(pp->fs->dd, &bl.data, ino->indirect)) {
-                inunalloc(pp->fs, idx2);
-                destroy(ino);
-                throw();
-            }
-            destroy(ino);
-        }
-        else {
-            inunalloc(pp->fs, idx2);
-            destroy(ino);
-            reterr(ErrDirFull);
-        }
-    }
-    
-    return idx2;
+    return linkentry(pp, &name, idx, TypeDir);
 }
 
-/*
-    mkdir -p /ddos/dir_depth_1/dir_depth_2/dir_depth_3/
-*/
-
 public ptr makedir_p(int8 *pathstr) {
+    /*
+        mkdir -p /ddos/dir_depth_1/dir_depth_2/dir_depth_3/
+    */
     path *pp;
     ptr idx, idx2, ret;
     int8 buf[256], tgt[256];
@@ -381,8 +303,8 @@ public ptr makedir_p(int8 *pathstr) {
 
     zero($1 buf, 256);
     zero($1 tgt, 256);
-    stringcopy($1 &buf, $1 pathstr, 255);
-    stringcopy($1 &tgt, $1 pathstr, 255);
+    stringcopy($1 buf, $1 pathstr, 255);
+    stringcopy($1 tgt, $1 pathstr, 255);
     
 
     size = stringlen(buf);
@@ -401,3 +323,138 @@ public ptr makedir_p(int8 *pathstr) {
         reterr(ErrPath);
     return ret;
 }
+
+public ptr touch(int8 *pathstr) {
+    path *pp; 
+    ptr idx;
+    int8 buf[256], buf1[256], tgt[256];
+    int8 *p;
+    int16 size;
+    filename *name;
+    
+    errnumber = ErrNoErr;
+
+    zero($1 &buf, 256);
+    zero($1 &tgt, 256);
+    stringcopy($1 buf, $1 pathstr, 255);
+    stringcopy($1 buf1,$1 pathstr, 255);
+
+    /* (xx) --> maybe i should track / in the end of the pathstr*/ 
+    size = stringlen(buf);
+    if (buf[size-1] == '/')  reterr(ErrPath);
+    
+    p = findcharr(buf, '/');
+    if (!p)
+        reterr(ErrPath);
+    
+    *p++ = 0;
+    stringcopy($1 tgt, $1 p, 255);
+    p = buf; 
+    pp = mkpath(p, (filesystem *)0);
+    if (!pp)
+        throw();
+    if (!(*pp->target.name))
+        idx=0;
+    else {
+        idx=path2inode(pp);
+        if (!idx &&  errnumber)
+            reterr(ErrPath);
+    }
+    
+    pp = mkpath(buf1, (filesystem *)0);
+    if (!pp)
+        throw();
+    
+    size = sizeof(struct s_filename);
+    zero($1 &name, size);
+    size = stringlen(tgt);
+    name = str2file(tgt);
+   
+   return linkentry(pp, name, idx, TypeFile);
+}
+
+public filedesc fdtable[MaxOpenFiles];
+public ptr fileopen(int8 *pathstr, int16 flags) {
+    path *pp;
+    int8 buf[256], buf1[256];
+    ptr idx;
+    int16 n;
+    
+    errnumber = ErrNoErr;
+   
+    stringcopy($1 buf, $1 pathstr, 255);
+    stringcopy($1 buf1, $1 pathstr, 255);
+    pp = mkpath(buf, (filesystem *)0);
+    if (!pp)
+        reterr(ErrPath);
+    
+    idx = path2inode(pp);
+    if (!idx && (flags & O_CREAT)) {
+        idx = touch(buf1);
+        if (!idx) reterr(ErrPath);
+    }
+    else if (!idx)
+        reterr(ErrInode);
+    
+    for (n=0; n<MaxOpenFiles; n++)
+        if (!fdtable[n].inuse)
+            break ;
+    
+    if (n<MaxOpenFiles && !fdtable[n].inuse) {
+        fdtable[n].inono = idx;
+        fdtable[n].offset = 0;
+        fdtable[n].flags = flags;
+        fdtable[n].inuse = true;
+        fdtable[n].fs = pp->fs;
+        
+        return n;
+    }
+    return (-1);
+}
+
+public ptr filewrite(int16 fd, int8* str, int16 size) {
+    ptr inono, blockno, blockidx;
+    inode *ino;
+    int32 offset;
+    fsblock bl;
+   
+    errnumber = ErrNoErr;
+    
+    if (size > 512)
+        reterr(ErrArg);
+    
+    if (fd < 0 || fd >= 256 || !fdtable[fd].inuse)
+        reterr(ErrBadFD);
+    
+    if (!fdtable[fd].inono || !fdtable[fd].fs)
+        reterr(ErrInode);
+    
+    inono  = fdtable[fd].inono;
+    offset = fdtable[fd].offset;
+    
+    blockidx = offset / 512;
+    
+    ino = findinode(fdtable[fd].fs, inono); /* (destroy needed) */
+    if (!ino)
+        reterr(ErrInode);
+    
+    if (!ino->direct[blockidx]) {
+        blockno = bitmapalloc(fdtable[fd].fs, fdtable[fd].fs->bitmap);
+            if (!blockno)
+                reterr(ErrNoMem);
+        ino->direct[blockidx] = blockno;
+    }
+    else blockno = ino->direct[blockidx];
+    
+    copy($1 &bl.data[offset % 512], $1 str, $2 size);
+    dwrite(fdtable[fd].fs->dd, &bl.data, blockno);
+   
+    ino->size = offset + size;
+    if (!fssaveinode(fdtable[fd].fs, ino, inono)) 
+        reterr(ErrInode);
+    fdtable[fd].offset += size;
+    
+    destroy(ino);
+    
+    return size;
+} 

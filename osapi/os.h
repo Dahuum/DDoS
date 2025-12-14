@@ -63,7 +63,7 @@ enum public packed {
 #endif
 
 
-public bool load(fd, int8);
+public bool load(fd,int8);
 public int8 store(fd);
 public void init();
 
@@ -71,3 +71,6 @@ public void *opendir(int8*);
 public int16 makedir(int8*);
 public int16 makedir_p(int8*);
 public int16 touch(int8*);
+
+public int16 fileopen(int8*,int16);
+public int16 filewrite(int16,int8*,int16)

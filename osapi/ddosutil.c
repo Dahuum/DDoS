@@ -145,10 +145,30 @@ void cmd_format(char *arg1, char *arg2) {
             printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
         destroy(dir);
     }
-
+    destroy(fpath2);
+    fpath2 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/dir_3/manza.txt");
+    // fpath2 = $1 strdup("c:/manza.txt");
+    idx = touch(fpath2);
+    if (!idx)
+        printf("makhdemch touch()");
 
     destroy(fpath3);
     
+    
+    fpath3 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/dir_3/") ;
+    dir = opendir(fpath3);
+    if (dir) {
+        printf("\033[1m" "\033[33m" "'%s' opened successfully (empty dir with %d files)\n" "\033[0m" "\033[0m",fpath2,  dir->len);
+        for (int n=0; n<dir->len; n++)
+            printf("\033[1m" "\033[33m" "  -  '%s'\n" "\033[0m" "\033[0m", file2str(&dir->filelist[n].name));
+        destroy(dir);
+    }
+    
+    int8 *fpath4 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/dir_3/manza.txt");
+    idx = fileopen(fpath4, 0);
+    
+    destroy(fpath3);
+    destroy(fpath4);
     destroy(fpath);
     destroy(fpath1);
     destroy(fpath2);

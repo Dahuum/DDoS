@@ -165,13 +165,24 @@ void cmd_format(char *arg1, char *arg2) {
     }
     
     int8 *fpath4 = $1 strdup("c:/ddos/dir_0/dir_1/dir_2/dir_3/manza.txt");
-    idx = fileopen(fpath4, 0);
+    sint16 sidx = fileopen(fpath4, 0);
+    if (sidx == -1)
+        printf("file open error, with idx = %d\n", sidx);
+    else 
+        printf("file opened, idx = %d\n", sidx);
+    
+    int8 *str = $1 strdup("i m finally writing on files");
+    sint16 sidx1 = filewrite(sidx, str, stringlen(str));
+    if (errnumber) 
+        printf("error happened in filewrite, errnumber = %d\n", errnumber);
+    else printf("stringlen(str) = %d,   size of bytes written: %d\n",stringlen(str), sidx1);
     
     destroy(fpath3);
     destroy(fpath4);
     destroy(fpath);
     destroy(fpath1);
     destroy(fpath2);
+    destroy(str);
     destroy(root);
     
     // if (idx1) indestroy(fs, idx1);

@@ -3,6 +3,7 @@
 
 typedef unsigned char int8;
 typedef unsigned short int int16;
+typedef signed short sint16;
 typedef unsigned int int32;
 typedef unsigned long long int int64;
 typedef int8 fd;
@@ -72,5 +73,5 @@ public int16 makedir(int8*);
 public int16 makedir_p(int8*);
 public int16 touch(int8*);
 
-public int16 fileopen(int8*,int16);
-public int16 filewrite(int16,int8*,int16)
+public sint16 fileopen(int8*,int16);
+public sint16 filewrite(int16,int8*,int16);

@@ -374,7 +374,7 @@ public ptr touch(int8 *pathstr) {
 }
 
 public filedesc fdtable[MaxOpenFiles];
-public ptr fileopen(int8 *pathstr, int16 flags) {
+public sint16 fileopen(int8 *pathstr, int16 flags) {
     path *pp;
     int8 buf[256], buf1[256];
     ptr idx;
@@ -412,7 +412,7 @@ public ptr fileopen(int8 *pathstr, int16 flags) {
     return (-1);
 }
 
-public ptr filewrite(int16 fd, int8* str, int16 size) {
+public sint16 filewrite(int16 fd, int8* str, int16 size) {
     ptr inono, blockno, blockidx;
     inode *ino;
     int32 offset;
@@ -446,6 +446,7 @@ public ptr filewrite(int16 fd, int8* str, int16 size) {
     }
     else blockno = ino->direct[blockidx];
     
+    zero($1 &bl, 512);
     copy($1 &bl.data[offset % 512], $1 str, $2 size);
     dwrite(fdtable[fd].fs->dd, &bl.data, blockno);
    

@@ -43,14 +43,14 @@ internal bitmap *mkbitmap(filesystem *fs, bool scan) {
     return bm;
 }
 
-internal int16 bitmapalloc(filesystem *fs, bitmap *bm) {
+internal int16 bitmapalloc(filesystem *fs, bitmap *bm, bool datablock) {
    int16 n;
-    int16 bl;
+   int16 bl;
 
    if (!bm || !fs)
        return 0;
 
-   for (n=1; n<fs->dd->blocks; n++) {
+   for (n=(1+fs->metadata.inodeblocks) ? (datablock) : 1; n<fs->dd->blocks; n++) {
        if (!getbit($1 bm, n)) {
            setbit($1 bm, n, true);
            bl = (n+1);
@@ -188,7 +188,8 @@ internal void fsshow(filesystem *fs, bool showbm) {
         if ((ino->validtype & 0x01))
            printf("Inode %d is valid (type=%s)\n"
                "   filename is %s\n"
-               "   %d size in bytes\n",
+               "   %d size in bytes\n"
+               "   inodeblocks: %d\n",
                     $2 inodeno,
                     (ino->validtype == TypeFile) ?
                         "file":
@@ -198,7 +199,8 @@ internal void fsshow(filesystem *fs, bool showbm) {
                     ((!inodeno) ?
                         "/" :
                     $c file2str(&ino->name)),
-                    $i ino->size
+                    $i ino->size,
+                    fs->metadata.inodeblocks
            );
    }
    if (showbm) {
@@ -978,7 +980,7 @@ internal ptr buildpath(path *p) {
                 }
 
                 else if (!ino->indirect) {
-                    blockno = bitmapalloc(p->fs, p->fs->bitmap);
+                    blockno = bitmapalloc(p->fs, p->fs->bitmap, false);
                     ino->indirect = blockno;
                     if (!fssaveinode(p->fs, ino, iptr)) {
                         inunalloc(p->fs, idx);
@@ -1064,7 +1066,7 @@ public ptr linkentry(path *pp, filename *name, int16 idx, type inotype) {
     }
     
     if (!ino->indirect) {
-        blockno = bitmapalloc(pp->fs, pp->fs->bitmap);
+        blockno = bitmapalloc(pp->fs, pp->fs->bitmap, false);
         ino->indirect = blockno;
         if (!fssaveinode(pp->fs, ino, idx)) {
             inunalloc(pp->fs, idx2);

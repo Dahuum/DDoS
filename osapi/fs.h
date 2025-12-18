@@ -14,7 +14,8 @@
 #define ValidPathChars  ($1 "abcdefghijklmnopqrstuvwxyz0123456789_-/:.")
 #define DirDepth        (16) 
 #define MaxFilesPerDir  (PtrPerInode+PtrPerBlock)
-#define MaxOpenFiles     (256)
+#define MaxOpenFiles    (256)
+#define Totalblocks     (65535)   
 
 typedef int16 ptr;   
 typedef int8 bootsector[500];
@@ -126,7 +127,7 @@ extern filedesc fdtable[MaxOpenFiles];
 /* internal -> private? */
 public   filesystem *fsformat(disk*,bootsector*,bool);
 internal bitmap *mkbitmap(filesystem*,bool);
-internal int16 bitmapalloc(filesystem*,bitmap*);
+internal int16 bitmapalloc(filesystem*,bitmap*, bool);
 internal void bitmapfree(filesystem*,bitmap*,int16);
 internal void fsshow(filesystem*,bool);
 internal inode *findinode(filesystem*,ptr);

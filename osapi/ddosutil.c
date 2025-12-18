@@ -69,7 +69,7 @@ void cmd_format(char *arg1, char *arg2) {
    int8 *fpath, *fpath1, *fpath2, *fpath3;
    int16 size = sizeof(struct s_filename);
    /* (xx) -> fsformat to fsmount */
-//    fs = fsmount(drive)/*, (bootsector *)0, bforce)*/; 
+   // fs = fsmount(drive)/*, (bootsector *)0, bforce)*/; 
    fs = fsformat(DiskDescriptor[drive-1], (bootsector *)0, bforce);
    if (!fs) {
        printf("formatting failed");
@@ -184,6 +184,8 @@ void cmd_format(char *arg1, char *arg2) {
     destroy(fpath2);
     destroy(str);
     destroy(root);
+    
+    fsshow(fs, false);
     
     // if (idx1) indestroy(fs, idx1);
     // if (fs) fsshow(fs, false);

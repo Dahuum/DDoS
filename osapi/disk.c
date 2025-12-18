@@ -91,7 +91,8 @@ public disk *dattach(int8 drive) {
         return (disk *)0;
     }
     
-    dd->blocks = $2 (sbuf.st_blocks-1);
+    //dd->blocks = $2 (sbuf.st_blocks-1);
+    dd->blocks = $2 Totalblocks; 
     dd->drive = drive;
     attached |= drive;
     

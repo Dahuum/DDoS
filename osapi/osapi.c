@@ -439,7 +439,7 @@ public sint16 filewrite(int16 fd, int8* str, int16 size) {
         reterr(ErrInode);
     
     if (!ino->direct[blockidx]) {
-        blockno = bitmapalloc(fdtable[fd].fs, fdtable[fd].fs->bitmap);
+        blockno = bitmapalloc(fdtable[fd].fs, fdtable[fd].fs->bitmap, true);
             if (!blockno)
                 reterr(ErrNoMem);
         ino->direct[blockidx] = blockno;

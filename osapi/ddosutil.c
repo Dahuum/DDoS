@@ -55,7 +55,7 @@ void cmd_format(char *arg1, char *arg2) {
    scanf("%c", &force);
    bforce = ((force == 'y') || (force == 'Y')) ? true : false;
    
-   printf("Formatting disk %s\n", drivestr);
+   printf("Formatting disk %s\n\n", drivestr);
    dinit();
    // dd = dattach(drive);
    // if (!dd) {
@@ -83,8 +83,6 @@ void cmd_format(char *arg1, char *arg2) {
    idx = increate(fs, &name, TypeFile);
    root->direct[0] = idx;
    int16 rett = fssaveinode(fs, root, $2 0);
-   
-   // printf("idx=%d\n", $i idx);
    
    zero($1 &name, size);
    stringcopy($1 &name.name, $1 "ddos", $2 4);
@@ -119,6 +117,7 @@ void cmd_format(char *arg1, char *arg2) {
     } else {
         printf("\033[1m" "\033[33m" "Created '%s' with inode %d\n" "\033[0m" "\033[0m" , fpath1, idx);
     }
+    
     fpath2 = $1 strdup("c:/ddos/////");
     dir = opendir(fpath2);
     if (dir) {

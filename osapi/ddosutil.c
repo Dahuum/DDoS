@@ -70,6 +70,7 @@ void cmd_format(char *arg1, char *arg2) {
    int16 size = sizeof(struct s_filename);
    /* (xx) -> fsformat to fsmount */
    // fs = fsmount(drive)/*, (bootsector *)0, bforce)*/; 
+    
    fs = fsformat(DiskDescriptor[drive-1], (bootsector *)0, bforce);
    if (!fs) {
        printf("formatting failed");

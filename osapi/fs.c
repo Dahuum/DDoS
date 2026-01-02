@@ -356,7 +356,7 @@ internal filename *str2file(int8 *str) {
 
      FSdescriptor[idx] = fs;
 
-    return fs;
+     return fs;
  }
 
  internal void fsunmount(filesystem *fs) {
@@ -581,7 +581,7 @@ internal ptr read_dir(filesystem *fs, ptr haystack, filename *needle) {
 
     errnumber = ErrNoErr;
 
-    printf("read_dir: searching inode %d for '%s'\n", haystack, file2str(needle));
+    // printf("read_dir: searching inode %d for '%s'\n", haystack, file2str(needle));
 
     if (!fs || !needle)
         reterr(ErrArg);
@@ -724,7 +724,7 @@ internal void showpath(const path *filepath) {
     
     if (!filepath)
         return ;
-    
+    printf("\033[1mshowpath:\033[0m\n");
     printf(
         "filesystem: \t0x%.08x\n"
         "drive: \t0x%.02hhx\n"
@@ -736,6 +736,7 @@ internal void showpath(const path *filepath) {
     
     for (p=filepath->dirpath[n=0]; *p; p=filepath->dirpath[++n])
         printf("   %d=%s\n", $i n, $c p);
+    printf("\n");
 }
 
 public path *mkpath(int8 *str, filesystem *fs) {
@@ -756,7 +757,7 @@ public path *mkpath(int8 *str, filesystem *fs) {
     if (size < stringlen(str))
         str[size] = (int8)0;
 
-    printf("\033[1m" "Daba blati n3ref had str lidakhel -> '%s'\033[0m\n", $c str);
+    // printf("\033[1m" "Daba blati n3ref had str lidakhel -> '%s'\033[0m\n", $c str);
 
     if (!str || !(*str))
         reterr(ErrArg);

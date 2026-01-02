@@ -6,8 +6,8 @@
 
 #define DriveC      (0x01)    /* 0001 */
 #define DriveD      (0x02)    /* 0010 */
-#define Basepath    ($1 "/home/void_id/Desktop/DDoS/drives/disk.")
-// #define Basepath    ($1 "/Users/mac/Desktop/DDoS/drives/disk.")
+// #define Basepath    ($1 "/home/void_id/Desktop/DDoS/drives/disk.")
+#define Basepath    ($1 "/Users/mac/Desktop/DDoS/drives/disk.")
 #define Maxdrive    (0x02)
 
 #define Blocksize   (512)

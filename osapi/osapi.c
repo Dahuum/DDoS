@@ -158,9 +158,7 @@ public void *opendir(int8 *pathstr) {
             if (!iptr && errnumber)
                 throw();
     }
-    printf("opendir\n");
     showpath(p);
-    printf("opendir\n");
     
     // iptr = $2 1;
     
